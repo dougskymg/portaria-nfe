@@ -532,13 +532,14 @@
 <script>
 const GOOGLE_APP_URL = 'https://script.google.com/macros/s/AKfycbzd_9n1yIOvSw3OdQ3QZaZbvYnMylZ6MEHVZN5zBC3W191AyLBS47i8QNwz3yTtpF7G/exec';
 
-const JANELAS = [{ini:'08:00',fim:'13:00'},{ini:'13:45',fim:'16:00'}];
+const JANELAS = [{ini:'07:00',fim:'16:00'}]; // janela única: 07:00–15:59 (portão abre às 7h, almoço incluído)
 const NOMES_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 let fornecedoresCache = JSON.parse(localStorage.getItem('portaria_fornecedores')||'{}');
 let registros = JSON.parse(localStorage.getItem('portaria_registros_hoje')||'[]');
 let todosOsDadosNuvem = []; 
 let timerInterval = null, timerSeconds = 0, autoSavePending = false;
+let tsChaveDetectada = null; // timestamp do momento em que a chave foi bipada/digitada
 
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
@@ -597,6 +598,7 @@ async function onChaveChange() {
   document.getElementById('chaveCounter').textContent = `${len}/44`;
   document.getElementById('chaveProgress').style.width = `${(len/44)*100}%`;
   if (len === 44) {
+    tsChaveDetectada = new Date(); // registra o momento real de chegada da NF
     txtChave.classList.add('valid');
     document.getElementById('txtNF').value = chave.substring(25,34);
     await buscarFornecedor(chave.substring(6,20));
@@ -725,7 +727,7 @@ async function salvar(auto=false) {
       fornecedor:(document.getElementById('txtFornecedor').value||'NÃO INFORMADO').toUpperCase().trim(),
       transportadora:(document.getElementById('txtTransportadora').value||'NÃO INFORMADO').toUpperCase().trim(),
       nf, id:document.getElementById('txtID').value.toUpperCase().trim()||'S/ ID',
-      janela:isInWindow()?'DENTRO':'FORA',
+      janela:isInWindow(tsChaveDetectada||now)?'DENTRO':'FORA',
       dePara:getCheck('chkDePara')?'SIM':'NÃO',
       ajuste:getCheck('chkAjuste')?'SIM':'NÃO',
       horaAjuste:getCheck('chkAjuste')?now.toLocaleTimeString('pt-BR'):'',
@@ -779,6 +781,7 @@ function persistir(){localStorage.setItem('portaria_registros_hoje',JSON.stringi
 
 function limpar(){
   txtChave.value='';
+  tsChaveDetectada = null; // reseta o timestamp para o próximo registro
   ['txtNF','txtFornecedor','txtTransportadora','txtID'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('txtTransportadora').disabled=false;
   document.getElementById('chaveCounter').textContent='0/44';
