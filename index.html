@@ -700,8 +700,16 @@
         AGUARDANDO RETIRADA
       </div>
       <div id="retPendentesEmpty" class="ret-empty">Nenhuma NF aguardando retirada</div>
+      <div id="retLoteBar" style="display:none;padding:10px 16px;background:var(--purple-dim);border-bottom:1px solid rgba(167,139,250,.2);display:none;align-items:center;justify-content:space-between;gap:12px;">
+        <span id="retLoteCount" style="font-family:var(--mono);font-size:12px;color:var(--purple);">0 NFs selecionadas</span>
+        <button class="btn-retirar" onclick="abrirModalRetiradasLote()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          RETIRAR SELECIONADAS
+        </button>
+      </div>
       <table class="ret-table" id="retPendentesTable" style="display:none;">
         <thead><tr>
+          <th style="width:36px;"><input type="checkbox" id="chkRetTodos" onchange="toggleTodosRetPendentes(this)" style="accent-color:var(--purple);cursor:pointer;width:14px;height:14px;"></th>
           <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Transportadora</th><th>Dias em Espera</th><th>Ação</th>
         </tr></thead>
         <tbody id="retPendentesBody"></tbody>
@@ -757,6 +765,48 @@
       <button class="btn-salvar" style="width:100%;margin-top:18px;" onclick="confirmarRetirada()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         CONFIRMAR RETIRADA
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RETIRADA EM LOTE -->
+<div class="modal-overlay" id="modalRetiradasLote" style="display:none;">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <span class="modal-title">Retirada em Lote</span>
+      <button class="modal-close" onclick="fecharModalRetiradasLote()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="retLoteResumo" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="field">
+          <label>Nome de quem está retirando</label>
+          <input type="text" id="retLoteNome" placeholder="Nome completo" autocomplete="off"
+            style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field">
+          <label>Matrícula</label>
+          <input type="text" id="retLoteMatricula" placeholder="Ex: DEL-12345" autocomplete="off"
+            style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') confirmarRetiradasLote()">
+        </div>
+      </div>
+      <!-- progresso -->
+      <div id="retLoteProgressoWrap" style="display:none;margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">PROCESSANDO</span>
+          <span id="retLoteProgressoNum" style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--purple);">0/0</span>
+        </div>
+        <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;">
+          <div id="retLoteProgressoBar" style="height:100%;width:0%;background:var(--purple);border-radius:4px;transition:width .3s;"></div>
+        </div>
+      </div>
+      <button class="btn-salvar" id="btnConfirmarLote" style="width:100%;margin-top:18px;background:var(--purple);border-color:var(--purple);" onclick="confirmarRetiradasLote()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="btnConfirmarLoteText">CONFIRMAR RETIRADA EM LOTE</span>
       </button>
     </div>
   </div>
@@ -1259,6 +1309,130 @@ function calcularDiasEspera(tsEntrada){
   return Math.floor((Date.now() - tsEntrada) / 86400000);
 }
 
+
+// ── RETIRADA EM LOTE ──────────────────────────────────────────
+function atualizarSelecaoLote(){
+  const chks = document.querySelectorAll('.chk-ret-pendente');
+  const selecionadas = Array.from(chks).filter(c => c.checked).length;
+  const bar = document.getElementById('retLoteBar');
+  const count = document.getElementById('retLoteCount');
+  if(!bar) return;
+  if(selecionadas > 0){
+    bar.style.display = 'flex';
+    count.textContent = selecionadas + ' NF' + (selecionadas>1?'s':'') + ' selecionada' + (selecionadas>1?'s':'');
+  } else {
+    bar.style.display = 'none';
+  }
+  // Sincronizar checkbox "selecionar todos"
+  const chkTodos = document.getElementById('chkRetTodos');
+  if(chkTodos) chkTodos.checked = chks.length > 0 && selecionadas === chks.length;
+}
+
+function toggleTodosRetPendentes(chk){
+  document.querySelectorAll('.chk-ret-pendente').forEach(c => c.checked = chk.checked);
+  atualizarSelecaoLote();
+}
+
+function abrirModalRetiradasLote(){
+  const selecionadas = Array.from(document.querySelectorAll('.chk-ret-pendente:checked'));
+  if(!selecionadas.length){ showToast('Selecione ao menos uma NF.','warn'); return; }
+
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  const resumo = document.getElementById('retLoteResumo');
+  resumo.innerHTML = selecionadas.map(chk => {
+    const reg = fonte.find(r => r && r.chave === chk.dataset.chave);
+    if(!reg) return '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
+      <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);min-width:90px;">NF ${reg.nf||'—'}</span>
+      <span style="font-size:12px;color:var(--text-muted);flex:1;">${(reg.fornecedor||'').substring(0,35)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('retLoteNome').value = '';
+  document.getElementById('retLoteMatricula').value = '';
+  document.getElementById('retLoteProgressoWrap').style.display = 'none';
+  document.getElementById('btnConfirmarLote').disabled = false;
+  document.getElementById('btnConfirmarLoteText').textContent = 'CONFIRMAR RETIRADA EM LOTE';
+  document.getElementById('modalRetiradasLote').style.display = 'flex';
+  setTimeout(() => document.getElementById('retLoteNome').focus(), 100);
+}
+
+function fecharModalRetiradasLote(){
+  document.getElementById('modalRetiradasLote').style.display = 'none';
+}
+
+async function confirmarRetiradasLote(){
+  const nome = document.getElementById('retLoteNome').value.trim();
+  const matricula = document.getElementById('retLoteMatricula').value.trim();
+  if(!nome){ showToast('Informe o nome.','warn'); document.getElementById('retLoteNome').focus(); return; }
+  if(!matricula){ showToast('Informe a matrícula.','warn'); document.getElementById('retLoteMatricula').focus(); return; }
+
+  const selecionadas = Array.from(document.querySelectorAll('.chk-ret-pendente:checked'));
+  const total = selecionadas.length;
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+
+  document.getElementById('retLoteProgressoWrap').style.display = 'block';
+  document.getElementById('btnConfirmarLote').disabled = true;
+  document.getElementById('retLoteProgressoNum').textContent = '0/' + total;
+  document.getElementById('retLoteProgressoBar').style.width = '0%';
+
+  let ok = 0, erros = 0;
+
+  for(let i = 0; i < selecionadas.length; i++){
+    const chave = selecionadas[i].dataset.chave;
+    const agora = new Date();
+    const horaRetirada = agora.toLocaleTimeString('pt-BR');
+    const tsRetirada = agora.getTime();
+
+    // Atualizar localmente
+    [registros, todosOsDadosNuvem].forEach(arr => {
+      const r = arr.find(x => x && x.chave === chave);
+      if(r){
+        r.statusRetirada = 'RETIRADO';
+        r.nomeRetirada = nome.toUpperCase();
+        r.matriculaRetirada = matricula.toUpperCase();
+        r.horaRetirada = horaRetirada;
+        r.tsRetirada = tsRetirada;
+      }
+    });
+
+    const reg = fonte.find(r => r && r.chave === chave);
+    if(reg) retiradas.unshift({...reg, statusRetirada:'RETIRADO', nomeRetirada:nome.toUpperCase(), matriculaRetirada:matricula.toUpperCase(), horaRetirada, tsRetirada});
+
+    // Enviar para Sheets
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 15000);
+      const resp = await fetch(GOOGLE_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ tipo:'retirada', chave, statusRetirada:'RETIRADO', nomeRetirada:nome.toUpperCase(), matriculaRetirada:matricula.toUpperCase(), horaRetirada, tsRetirada }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        signal: ctrl.signal
+      });
+      clearTimeout(tid);
+      resp.ok ? ok++ : erros++;
+    } catch(e){ erros++; }
+
+    // Atualizar progresso
+    document.getElementById('retLoteProgressoNum').textContent = (i+1) + '/' + total;
+    document.getElementById('retLoteProgressoBar').style.width = Math.round(((i+1)/total)*100) + '%';
+    await sleep(400);
+  }
+
+  persistir();
+  localStorage.setItem('portaria_retiradas', JSON.stringify(retiradas));
+  renderLog();
+
+  document.getElementById('btnConfirmarLoteText').textContent = ok + ' retiradas registradas' + (erros ? ' · ' + erros + ' com erro' : '');
+
+  setTimeout(() => {
+    fecharModalRetiradasLote();
+    renderRetiradas();
+    atualizarBadgeRetiradas();
+    showToast(ok + ' retirada(s) registrada(s) com sucesso!', 'success');
+  }, 1200);
+}
+
 function renderRetiradas(){
   atualizarBadgeRetiradas();
   const busca = (document.getElementById('retBusca')||{value:''}).value.toLowerCase();
@@ -1283,14 +1457,16 @@ function renderRetiradas(){
       const diasClass = dias === 0 ? 'dias-ok' : dias <= 2 ? 'dias-warn' : 'dias-crit';
       const diasLabel = dias === 0 ? 'Hoje' : dias + ' dia' + (dias>1?'s':'');
       return `<tr>
+        <td style="width:36px;text-align:center;"><input type="checkbox" class="chk-ret-pendente" data-chave="${r.chave}" onchange="atualizarSelecaoLote()" style="accent-color:var(--purple);cursor:pointer;width:14px;height:14px;"></td>
         <td style="font-family:var(--mono);font-size:12px;">${r.data||''} ${r.hora||''}</td>
         <td style="font-family:var(--mono);font-weight:600;">${r.nf||'—'}</td>
         <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.fornecedor||''}">${(r.fornecedor||'NÃO INFORMADO').substring(0,30)}${(r.fornecedor||'').length>30?'…':''}</td>
         <td style="font-size:12px;color:var(--text-muted);">${r.transportadora||'—'}</td>
         <td><span class="dias-espera ${diasClass}">${diasLabel}</span></td>
-        <td><button class="btn-retirar" onclick="abrirModalRetirada('${r.chave}')">REGISTRAR RETIRADA</button></td>
+        <td><button class="btn-retirar" onclick="abrirModalRetirada('${r.chave}')">RETIRAR</button></td>
       </tr>`;
     }).join('');
+    atualizarSelecaoLote();
   }
 
   // ── HISTÓRICO ──
