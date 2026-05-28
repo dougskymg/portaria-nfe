@@ -844,8 +844,10 @@ function showToast(message, type = 'info') {
 function setPage(p) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).classList.add('active');
-  document.getElementById('tab' + p.charAt(0).toUpperCase() + p.slice(1)).classList.add('active');
+  const pageEl = document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1));
+  const tabEl  = document.getElementById('tab'  + p.charAt(0).toUpperCase() + p.slice(1));
+  if(pageEl) pageEl.classList.add('active');
+  if(tabEl)  tabEl.classList.add('active');
   if (p === 'dashboard') renderDashboard();
   if (p === 'retiradas') renderRetiradas();
 }
@@ -1951,6 +1953,12 @@ async function carregarDadosDoGoogle() {
         // Formato BR já existente: garante zero à esquerda
         const p = r.data.split('/');
         r.data = p[0].padStart(2,'0') + '/' + p[1].padStart(2,'0') + '/' + p[2];
+      }
+      // Normalizar campo hora se vier como ISO serial do Sheets (1899-12-30T...)
+      if(r.hora && typeof r.hora === 'string' && r.hora.startsWith('1899-12-30T')) {
+        // Extrai HH:MM:SS da string ISO
+        const match = r.hora.match(/T(\d{2}):(\d{2}):(\d{2})/);
+        if(match) r.hora = match[1] + ':' + match[2] + ':' + match[3];
       }
       return r;
     });
