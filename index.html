@@ -1915,6 +1915,11 @@ async function carregarDadosDoGoogle() {
         const match = r.hora.match(/T(\d{2}):(\d{2}):(\d{2})/);
         if(match) r.hora = match[1] + ':' + match[2] + ':' + match[3];
       }
+      // horaRetirada pode vir como serial 1899-12-30T... do Sheets
+      if(r.horaRetirada && typeof r.horaRetirada === 'string' && r.horaRetirada.startsWith('1899-12-30T')) {
+        const match = r.horaRetirada.match(/T(\d{2}):(\d{2}):(\d{2})/);
+        if(match) r.horaRetirada = r.data + ' ' + match[1] + ':' + match[2] + ':' + match[3];
+      }
       return r;
     });
 
