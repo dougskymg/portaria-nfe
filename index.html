@@ -1925,12 +1925,19 @@ async function carregarDadosDoGoogle() {
       todosOsDadosNuvem = [];
     }
 
-    // Desduplicar por chave — manter apenas a primeira ocorrência de cada chave
+    // Desduplicar por chave+data — mesma NF pode aparecer em dias diferentes (lotes retroativos)
     const chavesVistas = new Set();
     todosOsDadosNuvem = todosOsDadosNuvem.filter(r => {
       if(!r || !r.chave) return false;
-      if(chavesVistas.has(r.chave)) return false;
-      chavesVistas.add(r.chave);
+      // Normaliza a data antes de usar como chave de deduplicação
+      let dataKey = r.data || '';
+      if(/^\d{4}-/.test(dataKey)) {
+        const partes = dataKey.substring(0,10).split('-');
+        dataKey = partes[2] + '/' + partes[1] + '/' + partes[0];
+      }
+      const key = r.chave + '|' + dataKey;
+      if(chavesVistas.has(key)) return false;
+      chavesVistas.add(key);
       return true;
     });
 
