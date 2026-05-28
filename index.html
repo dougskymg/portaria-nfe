@@ -1764,24 +1764,37 @@ function renderDashboard(){
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const dataFmt = d.toLocaleDateString('pt-BR');
+    const dia = String(d.getDate()).padStart(2,'0');
+    const mes = String(d.getMonth()+1).padStart(2,'0');
+    const ano = d.getFullYear();
+    const dataFmt = `${dia}/${mes}/${ano}`;
     listaDias.push(dataFmt);
     listaDiasStr.push(dataFmt);
     if (i === 0) labelsDias.push("Hoje");
     else if (i === 1) labelsDias.push("Ontem");
-    else labelsDias.push(`${diasSemana[d.getDay()]} (${dataFmt.substring(0,5)})`);
+    else labelsDias.push(`${diasSemana[d.getDay()]} (${dia}/${mes})`);
   }
   const contagemTrend = {};
   listaDiasStr.forEach(dia => contagemTrend[dia] = 0);
+
+  // Função para formatar data como DD/MM/AAAA com zero à esquerda
+  function fmtData(d) {
+    return String(d.getDate()).padStart(2,'0') + '/' +
+           String(d.getMonth()+1).padStart(2,'0') + '/' +
+           d.getFullYear();
+  }
+
   todosOsDadosNuvem.forEach(r => {
     if(!r) return;
-    // Prioriza o campo data (já normalizado para DD/MM/AAAA na carga)
     let dataR = r.data;
-    // Só usa tsEntrada se data estiver ausente ou em formato ISO
-    if(!dataR || /^\d{4}-/.test(dataR)) {
+    // Normaliza para DD/MM/AAAA com zero à esquerda
+    if(dataR && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dataR)) {
+      const partes = dataR.split('/');
+      dataR = partes[0].padStart(2,'0') + '/' + partes[1].padStart(2,'0') + '/' + partes[2];
+    } else if(!dataR || /^\d{4}-/.test(dataR)) {
       if(r.tsEntrada) {
         const dt = new Date(Number(r.tsEntrada));
-        if(!isNaN(dt)) dataR = dt.toLocaleDateString('pt-BR');
+        if(!isNaN(dt)) dataR = fmtData(dt);
       }
     }
     if(dataR && contagemTrend[dataR] !== undefined) contagemTrend[dataR]++;
