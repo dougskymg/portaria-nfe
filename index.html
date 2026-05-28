@@ -1907,6 +1907,15 @@ async function carregarDadosDoGoogle() {
       todosOsDadosNuvem = [];
     }
 
+    // Desduplicar por chave — manter apenas a primeira ocorrência de cada chave
+    const chavesVistas = new Set();
+    todosOsDadosNuvem = todosOsDadosNuvem.filter(r => {
+      if(!r || !r.chave) return false;
+      if(chavesVistas.has(r.chave)) return false;
+      chavesVistas.add(r.chave);
+      return true;
+    });
+
     // Normalizar campo data para DD/MM/AAAA em todos os registros
     todosOsDadosNuvem = todosOsDadosNuvem.map(r => {
       if(!r) return r;
@@ -1916,6 +1925,19 @@ async function carregarDadosDoGoogle() {
       }
       return r;
     });
+
+    // Popular histórico de retiradas com registros já retirados na planilha
+    const retiiradasNuvem = todosOsDadosNuvem.filter(r => r && r.statusRetirada === 'RETIRADO');
+    if(retiiradasNuvem.length) {
+      const chavesRetiradas = new Set(retiradas.map(r => r && r.chave));
+      retiiradasNuvem.forEach(r => {
+        if(!chavesRetiradas.has(r.chave)) {
+          retiradas.unshift({...r});
+          chavesRetiradas.add(r.chave);
+        }
+      });
+      localStorage.setItem('portaria_retiradas', JSON.stringify(retiradas));
+    }
     
     const hoje = new Date().toLocaleDateString('pt-BR');
     registros = todosOsDadosNuvem.filter(r => r && (r.data === hoje || r.data === hoje.substring(0,6)+hoje.split('/')[2].substring(2))); 
