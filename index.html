@@ -1956,6 +1956,14 @@ async function carregarDadosDoGoogle() {
     });
 
     // Popular histórico de retiradas com registros já retirados na planilha
+    // DIAGNÓSTICO: verificar datas de 25/05
+    const reg25 = todosOsDadosNuvem.filter(r => r && r.data && r.data.includes('25/05'));
+    console.log('[DIAGNÓSTICO] Registros com data 25/05:', reg25.length);
+    if(reg25.length === 0) {
+      const amostra = todosOsDadosNuvem.slice(0,3).map(r => r && r.data);
+      console.log('[DIAGNÓSTICO] Amostra de datas após normalização:', amostra);
+    }
+    // FIM DIAGNÓSTICO
     const retiiradasNuvem = todosOsDadosNuvem.filter(r => r && r.statusRetirada === 'RETIRADO');
     if(retiiradasNuvem.length) {
       const chavesRetiradas = new Set(retiradas.map(r => r && r.chave));
