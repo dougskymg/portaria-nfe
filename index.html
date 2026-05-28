@@ -47,6 +47,72 @@
   .window-out .dot{background:var(--amber);}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
+
+  /* ── PURPLE CHECK (Aguarda Retirada) ── */
+  .purple-check .check-dot { border-color: var(--purple); }
+  .purple-check.active { background: var(--purple-dim); border-color: var(--purple); color: var(--purple); }
+  .purple-check.active .check-dot { background: var(--purple); border-color: var(--purple); }
+  .purple-check.active .check-dot svg { stroke: #fff; opacity: 1; }
+
+  /* ── TAB RETIRADAS ── */
+  .nav-tab.active.tab-retiradas { color: var(--purple); }
+
+  /* ── PÁGINA RETIRADAS ── */
+  .ret-wrap { max-width:1200px; width:100%; margin:0 auto; padding:24px; display:flex; flex-direction:column; gap:20px; }
+  .ret-header-bar { display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px 20px; }
+  .ret-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+  .ret-section-title { display:flex; align-items:center; gap:8px; padding:12px 20px; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); background:var(--surface2); }
+  .ret-empty { padding:28px; text-align:center; color:var(--text-dim); font-size:13px; }
+  .ret-table { width:100%; border-collapse:collapse; }
+  .ret-table th { padding:10px 16px; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); text-align:left; background:var(--surface2); }
+  .ret-table td { padding:10px 16px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .ret-table tr:last-child td { border-bottom:none; }
+  .ret-table tr:hover td { background:var(--surface2); }
+  .btn-retirar { background:var(--purple-dim); color:var(--purple); border:1px solid rgba(167,139,250,.3); padding:5px 14px; border-radius:var(--radius); font-family:var(--mono); font-size:11px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .btn-retirar:hover { background:var(--purple); color:#fff; }
+  .dias-espera { display:inline-block; padding:2px 8px; border-radius:10px; font-family:var(--mono); font-size:11px; font-weight:600; }
+  .dias-ok { background:var(--green-dim); color:var(--green); }
+  .dias-warn { background:var(--amber-dim); color:var(--amber); }
+  .dias-crit { background:var(--red-dim); color:var(--red); }
+
+  /* ── LOTE NF LIST (step 2) ── */
+  .lote-nf-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);}
+  .lote-dup-row{opacity:.45;}
+  .lote-nf-num{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);min-width:90px;}
+  .lote-nf-chave{font-family:var(--mono);font-size:10px;color:var(--text-dim);flex:1;}
+  .lote-dup-tag{font-family:var(--mono);font-size:10px;color:var(--amber);background:var(--amber-dim);padding:2px 8px;border-radius:10px;}
+  .lote-depara-label{display:flex;align-items:center;gap:6px;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--text-muted);padding:4px 10px;border-radius:var(--radius);border:1px solid var(--border);transition:all .2s;white-space:nowrap;}
+  .lote-depara-label:hover{border-color:var(--accent);color:var(--accent);}
+  .lote-depara-label input[type="checkbox"]{accent-color:var(--accent);width:13px;height:13px;cursor:pointer;}
+  .lote-depara-label:has(input:checked){border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+
+  /* ── BTN LOTE ── */
+  .btn-lote{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;border-radius:var(--radius);font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;cursor:pointer;border:1px dashed var(--border);background:transparent;color:var(--text-muted);transition:all .2s;}
+  .btn-lote:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+  .btn-lote svg{stroke:currentColor;}
+
+  /* ── MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:560px;overflow:hidden;}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+  .modal-title{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text);}
+  .modal-close{background:none;border:none;color:var(--text-muted);font-size:16px;cursor:pointer;padding:4px 8px;border-radius:4px;transition:all .2s;}
+  .modal-close:hover{color:var(--text);background:var(--surface2);}
+  .modal-body{padding:20px;}
+
+  /* ── LOTE FEED ── */
+  .lote-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:11px;}
+  .lote-item.ok{border-color:rgba(61,220,151,.3);}
+  .lote-item.erro{border-color:rgba(255,90,90,.3);}
+  .lote-item.dup{border-color:rgba(245,166,35,.3);}
+  .lote-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .lote-item.ok .lote-status{background:var(--green);}
+  .lote-item.erro .lote-status{background:var(--red);}
+  .lote-item.dup .lote-status{background:var(--amber);}
+  .lote-nf{font-weight:600;color:var(--text);}
+  .lote-desc{color:var(--text-muted);flex:1;}
+
+
   /* ── PAGES ── */
   .page{display:none;} .page.active{display:flex;flex-direction:column;}
 
@@ -290,6 +356,10 @@
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span class="tab-label">Dashboard</span>
     </button>
+    <button class="nav-tab tab-retiradas" id="tabRetiradas" onclick="setPage('retiradas')">
+      <svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+      <span class="tab-label">Retiradas</span>
+    </button>
   </nav>
 
   <div style="display:flex;align-items:center;gap:12px;">
@@ -354,6 +424,10 @@
             <div class="check-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
             Ajuste Comprador
           </div>
+          <div class="check-item purple-check" id="chkRetirada" onclick="toggleCheck('chkRetirada')">
+            <div class="check-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            Aguarda Retirada
+          </div>
         </div>
 
         <div class="timer-bar" id="timerBar">
@@ -372,8 +446,86 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           <span id="btnText">REGISTRAR ENTRADA</span>
         </button>
+
+        <button class="btn-lote" onclick="abrirModalLote()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          IMPORTAR EM LOTE
+        </button>
       </div>
     </div>
+  </div>
+
+  <!-- MODAL LOTE -->
+  <div class="modal-overlay" id="modalLote" style="display:none;">
+    <div class="modal-box" style="max-width:620px;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="modal-title">Importação em Lote</span>
+          <div id="loteStepIndicator" style="display:flex;gap:6px;"></div>
+        </div>
+        <button class="modal-close" onclick="fecharModalLote()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- STEP 1: colar chaves -->
+        <div id="loteStep1">
+          <div class="chave-label" style="margin-bottom:6px;">Cole as chaves NF-e abaixo (uma por linha)</div>
+          <textarea id="txtLote" placeholder="Cole aqui as chaves de acesso, uma por linha..." style="width:100%;height:150px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;resize:vertical;line-height:1.6;"></textarea>
+          <div id="lotePreview" style="margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);min-height:18px;"></div>
+          <button class="btn-salvar" style="margin-top:14px;width:100%;" onclick="irParaStep2()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            PRÓXIMO — CONFIGURAR LOTE
+          </button>
+        </div>
+
+        <!-- STEP 2: transportadora + De/Para por NF -->
+        <div id="loteStep2" style="display:none;">
+          <div style="margin-bottom:14px;">
+            <div class="chave-label" style="margin-bottom:6px;">Transportadora do Lote</div>
+            <input type="text" id="txtTransportadoraLote" placeholder="Nome da transportadora (ex: COPALOG)"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div class="chave-label">Marque as NFs com De/Para</div>
+            <button onclick="toggleTodosDepara()" style="background:none;border:none;color:var(--accent);font-family:var(--mono);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;" id="btnToggleDepara">MARCAR TODAS</button>
+          </div>
+          <div id="loteNfList" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-lote" style="flex:1;" onclick="voltarStep1()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              VOLTAR
+            </button>
+            <button class="btn-salvar" style="flex:2;" onclick="iniciarProcessamentoLote()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              INICIAR PROCESSAMENTO
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: processamento -->
+        <div id="loteStep3" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);">PROCESSANDO LOTE</span>
+            <span id="loteProgresso" style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);">0 / 0</span>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:16px;">
+            <div id="loteBarraProgresso" style="height:100%;width:0%;background:var(--accent);border-radius:4px;transition:width .3s;"></div>
+          </div>
+          <div id="loteAtual" style="font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-bottom:14px;min-height:32px;"></div>
+          <div id="loteFeed" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+          <div id="loteRodape" style="display:none;margin-top:16px;">
+            <div id="loteResumo" style="font-family:var(--mono);font-size:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;"></div>
+            <button class="btn-salvar" style="width:100%;" onclick="fecharModalLote()">CONCLUIDO</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pageDashboard_PLACEHOLDER" style="display:none;"></div>
+  <!-- fim modal lote -->
 
     <div class="log-panel">
       <div class="log-panel-header">
@@ -527,10 +679,93 @@
   </div>
 </div>
 
+<div class="page" id="pageRetiradas">
+  <div class="ret-wrap">
+
+    <div class="ret-header-bar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;">CONTROLE DE RETIRADAS</span>
+        <span id="retPendenteBadge" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.3);font-family:var(--mono);font-size:11px;padding:2px 10px;border-radius:12px;display:none;">0 pendentes</span>
+      </div>
+      <input type="text" id="retBusca" placeholder="Buscar por NF, fornecedor ou matrícula..." oninput="renderRetiradas()"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;width:280px;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <!-- PENDENTES -->
+    <div class="ret-section">
+      <div class="ret-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        AGUARDANDO RETIRADA
+      </div>
+      <div id="retPendentesEmpty" class="ret-empty">Nenhuma NF aguardando retirada</div>
+      <table class="ret-table" id="retPendentesTable" style="display:none;">
+        <thead><tr>
+          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Transportadora</th><th>Dias em Espera</th><th>Ação</th>
+        </tr></thead>
+        <tbody id="retPendentesBody"></tbody>
+      </table>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="ret-section">
+      <div class="ret-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        HISTÓRICO DE RETIRADAS
+      </div>
+      <div id="retHistoricoEmpty" class="ret-empty">Nenhuma retirada registrada ainda</div>
+      <table class="ret-table" id="retHistoricoTable" style="display:none;">
+        <thead><tr>
+          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Retirado em</th><th>Nome</th><th>Matrícula</th><th>Tempo Espera</th>
+        </tr></thead>
+        <tbody id="retHistoricoBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL RETIRADA -->
+<div class="modal-overlay" id="modalRetirada" style="display:none;">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title">Registrar Retirada</span>
+      <button class="modal-close" onclick="fecharModalRetirada()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-bottom:4px;">NF SENDO RETIRADA</div>
+        <div id="retModalNF" style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);"></div>
+        <div id="retModalFornecedor" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="field">
+          <label>Nome de quem está retirando</label>
+          <input type="text" id="retNome" placeholder="Nome completo" autocomplete="off"
+            style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field">
+          <label>Matrícula</label>
+          <input type="text" id="retMatricula" placeholder="Ex: DEL-12345" autocomplete="off"
+            style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') confirmarRetirada()">
+        </div>
+      </div>
+      <button class="btn-salvar" style="width:100%;margin-top:18px;" onclick="confirmarRetirada()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        CONFIRMAR RETIRADA
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const GOOGLE_APP_URL = 'https://script.google.com/macros/s/AKfycbzd_9n1yIOvSw3OdQ3QZaZbvYnMylZ6MEHVZN5zBC3W191AyLBS47i8QNwz3yTtpF7G/exec';
+const GOOGLE_APP_URL = 'https://script.google.com/macros/s/AKfycbyvu2aZdZdyF6-3r-NZskGkHo4mvHZ0rSwAFetP4zle6cNq4mzzuOrp4dgjygzSaJKM/exec';
 
 const JANELAS = [{ini:'07:00',fim:'16:00'}]; // janela única: 07:00–15:59 (portão abre às 7h, almoço incluído)
 const NOMES_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -562,6 +797,7 @@ function setPage(p) {
   document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).classList.add('active');
   document.getElementById('tab' + p.charAt(0).toUpperCase() + p.slice(1)).classList.add('active');
   if (p === 'dashboard') renderDashboard();
+  if (p === 'retiradas') renderRetiradas();
 }
 
 function updateClock() {
@@ -733,7 +969,10 @@ async function salvar(auto=false) {
       horaAjuste:getCheck('chkAjuste')?now.toLocaleTimeString('pt-BR'):'',
       tsAjuste:getCheck('chkAjuste')?now.getTime():null,
       deltaMin:getCheck('chkAjuste')?0:null,
-      chave, cnpj:chave.substring(6,20)
+      chave, cnpj:chave.substring(6,20),
+      aguardaRetirada:getCheck('chkRetirada')?'SIM':'NÃO',
+      statusRetirada:getCheck('chkRetirada')?'PENDENTE':'',
+      nomeRetirada:'', matriculaRetirada:'', horaRetirada:'', tsRetirada:null
     };
 
     const controller = new AbortController();
@@ -779,6 +1018,400 @@ async function salvar(auto=false) {
 
 function persistir(){localStorage.setItem('portaria_registros_hoje',JSON.stringify(registros));}
 
+
+// ══════════════════════════════════════════════
+// IMPORTAÇÃO EM LOTE
+// ══════════════════════════════════════════════
+let loteChavesAtual = [];
+
+function abrirModalLote(){
+  loteChavesAtual = [];
+  document.getElementById('loteStep1').style.display='block';
+  document.getElementById('loteStep2').style.display='none';
+  document.getElementById('loteStep3').style.display='none';
+  document.getElementById('loteRodape').style.display='none';
+  document.getElementById('txtLote').value='';
+  document.getElementById('txtTransportadoraLote').value='';
+  document.getElementById('lotePreview').textContent='';
+  document.getElementById('loteFeed').innerHTML='';
+  document.getElementById('loteNfList').innerHTML='';
+  document.getElementById('modalLote').style.display='flex';
+  document.getElementById('txtLote').focus();
+}
+
+function fecharModalLote(){
+  document.getElementById('modalLote').style.display='none';
+}
+
+function voltarStep1(){
+  document.getElementById('loteStep2').style.display='none';
+  document.getElementById('loteStep1').style.display='block';
+}
+
+function irParaStep2(){
+  const texto = document.getElementById('txtLote').value;
+  const chaves = parsearChavesLote(texto);
+  if(chaves.length === 0){
+    showToast('Nenhuma chave válida encontrada (44 dígitos numéricos).','warn');
+    return;
+  }
+  loteChavesAtual = chaves;
+
+  // Montar lista de NFs com checkbox De/Para
+  const lista = document.getElementById('loteNfList');
+  lista.innerHTML = chaves.map((chave, i) => {
+    const nf = chave.substring(25, 34);
+    const isDup = registros.find(r => r && r.chave === chave);
+    return `<div class="lote-nf-row${isDup ? ' lote-dup-row' : ''}" data-index="${i}">
+      <span class="lote-nf-num">${nf}</span>
+      <span class="lote-nf-chave">${chave.substring(0,10)}...${chave.substring(34)}</span>
+      ${isDup
+        ? '<span class="lote-dup-tag">JÁ REGISTRADA</span>'
+        : `<label class="lote-depara-label">
+            <input type="checkbox" class="lote-depara-chk" data-chave="${chave}">
+            <span>De/Para</span>
+          </label>`
+      }
+    </div>`;
+  }).join('');
+
+  document.getElementById('loteStep1').style.display='none';
+  document.getElementById('loteStep2').style.display='block';
+  document.getElementById('txtTransportadoraLote').focus();
+}
+
+function toggleTodosDepara(){
+  const chks = document.querySelectorAll('.lote-depara-chk');
+  const todasMarcadas = Array.from(chks).every(c => c.checked);
+  chks.forEach(c => c.checked = !todasMarcadas);
+  document.getElementById('btnToggleDepara').textContent = todasMarcadas ? 'MARCAR TODAS' : 'DESMARCAR TODAS';
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') fecharModalLote();
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+  const txtLote = document.getElementById('txtLote');
+  if(txtLote){
+    txtLote.addEventListener('input', function(){
+      const chaves = parsearChavesLote(this.value);
+      const el = document.getElementById('lotePreview');
+      if(chaves.length === 0){ el.textContent = ''; return; }
+      el.textContent = chaves.length + ' chave(s) detectada(s).';
+    });
+  }
+});
+
+function parsearChavesLote(texto){
+  return texto.split(/[\r\n]+/)
+    .map(l => l.replace(/[^0-9]/g,''))
+    .filter(l => l.length === 44);
+}
+
+async function iniciarProcessamentoLote(){
+  const chaves = loteChavesAtual;
+  const transportadora = (document.getElementById('txtTransportadoraLote').value || 'NÃO INFORMADO').toUpperCase().trim();
+
+  // Coletar quais NFs têm De/Para marcado
+  const deparaSet = new Set();
+  document.querySelectorAll('.lote-depara-chk:checked').forEach(chk => {
+    deparaSet.add(chk.dataset.chave);
+  });
+
+  document.getElementById('loteStep2').style.display='none';
+  document.getElementById('loteStep3').style.display='block';
+  document.getElementById('loteRodape').style.display='none';
+  document.getElementById('loteFeed').innerHTML='';
+
+  let ok=0, erros=0, duplicadas=0;
+
+  for(let i=0; i<chaves.length; i++){
+    const chave = chaves[i];
+    const nf = chave.substring(25,34);
+    const cnpj = chave.substring(6,20);
+    const total = chaves.length;
+
+    document.getElementById('loteProgresso').textContent = (i+1) + ' / ' + total;
+    document.getElementById('loteBarraProgresso').style.width = Math.round(((i+1)/total)*100) + '%';
+    document.getElementById('loteAtual').innerHTML =
+      '<span style="color:var(--accent)">Processando:</span> NF ' + nf + ' · ' + transportadora;
+
+    if(registros.find(r => r && r.chave === chave)){
+      duplicadas++;
+      adicionarFeedLote('dup', nf, 'Já registrada hoje — ignorada');
+      await sleep(200);
+      continue;
+    }
+
+    let fornecedor = 'NÃO INFORMADO';
+    try {
+      if(fornecedoresCache[cnpj]){
+        fornecedor = fornecedoresCache[cnpj];
+      } else {
+        const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+        if(r.ok){
+          const d = await r.json();
+          fornecedor = (d.razao_social || d.nome_fantasia || 'NÃO INFORMADO').toUpperCase().trim();
+          fornecedoresCache[cnpj] = fornecedor;
+          localStorage.setItem('portaria_fornecedores', JSON.stringify(fornecedoresCache));
+        }
+      }
+    } catch(e){}
+
+    const tsChave = new Date();
+    const temDepara = deparaSet.has(chave);
+    const registro = {
+      data: tsChave.toLocaleDateString('pt-BR'),
+      hora: tsChave.toLocaleTimeString('pt-BR'),
+      tsEntrada: tsChave.getTime(),
+      horaH: tsChave.getHours(),
+      fornecedor: fornecedor,
+      transportadora: transportadora,
+      nf: nf,
+      id: 'S/ ID',
+      janela: isInWindow(tsChave) ? 'DENTRO' : 'FORA',
+      dePara: temDepara ? 'SIM' : 'NÃO',
+      ajuste: 'NÃO',
+      horaAjuste: '',
+      tsAjuste: null,
+      deltaMin: null,
+      chave: chave,
+      cnpj: cnpj,
+      lote: true
+    };
+
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 15000);
+      const resp = await fetch(GOOGLE_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify(registro),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        signal: controller.signal
+      });
+      clearTimeout(tid);
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      registros.unshift(registro);
+      if(Array.isArray(todosOsDadosNuvem)) todosOsDadosNuvem.unshift(registro);
+      persistir();
+      renderLog();
+      ok++;
+      const flags = temDepara ? ' · DE/PARA' : '';
+      adicionarFeedLote('ok', nf, fornecedor.substring(0,30) + ' · ' + registro.janela + flags);
+    } catch(e){
+      erros++;
+      adicionarFeedLote('erro', nf, 'Falha ao enviar: ' + (e.message||'erro'));
+    }
+
+    await sleep(600);
+  }
+
+  document.getElementById('loteAtual').textContent = 'Processamento concluído.';
+  document.getElementById('loteResumo').innerHTML =
+    '<span style="color:var(--green)">&#10003; ' + ok + ' registradas</span>' +
+    (duplicadas ? ' &nbsp;&middot;&nbsp; <span style="color:var(--amber)">&#9888; ' + duplicadas + ' duplicadas</span>' : '') +
+    (erros ? ' &nbsp;&middot;&nbsp; <span style="color:var(--red)">&#10007; ' + erros + ' com erro</span>' : '');
+  document.getElementById('loteRodape').style.display='block';
+}
+
+function adicionarFeedLote(tipo, nf, desc){
+  const feed = document.getElementById('loteFeed');
+  const item = document.createElement('div');
+  item.className = 'lote-item ' + tipo;
+  item.innerHTML = '<div class="lote-status"></div><span class="lote-nf">NF ' + nf + '</span><span class="lote-desc">' + desc + '</span>';
+  feed.prepend(item);
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+
+// ══════════════════════════════════════════════
+// RETIRADAS
+// ══════════════════════════════════════════════
+let retiradas = JSON.parse(localStorage.getItem('portaria_retiradas')||'[]');
+let retChaveAtual = null;
+
+function atualizarBadgeRetiradas(){
+  const pendentes = obterPendentes().length;
+  const badge = document.getElementById('retPendenteBadge');
+  if(!badge) return;
+  if(pendentes > 0){
+    badge.textContent = pendentes + ' pendente' + (pendentes>1?'s':'');
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function obterPendentes(){
+  // Busca em todos os registros (nuvem + local) que têm aguardaRetirada=SIM e statusRetirada=PENDENTE
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  return fonte.filter(r => r && r.aguardaRetirada === 'SIM' && r.statusRetirada === 'PENDENTE');
+}
+
+function obterRetirados(){
+  return retiradas.slice().sort((a,b) => (b.tsRetirada||0) - (a.tsRetirada||0));
+}
+
+function calcularDiasEspera(tsEntrada){
+  if(!tsEntrada) return 0;
+  return Math.floor((Date.now() - tsEntrada) / 86400000);
+}
+
+function renderRetiradas(){
+  atualizarBadgeRetiradas();
+  const busca = (document.getElementById('retBusca')||{value:''}).value.toLowerCase();
+
+  // ── PENDENTES ──
+  let pendentes = obterPendentes();
+  if(busca) pendentes = pendentes.filter(r =>
+    (r.nf||'').toLowerCase().includes(busca) ||
+    (r.fornecedor||'').toLowerCase().includes(busca)
+  );
+
+  const bodyP = document.getElementById('retPendentesBody');
+  const tableP = document.getElementById('retPendentesTable');
+  const emptyP = document.getElementById('retPendentesEmpty');
+
+  if(!pendentes.length){
+    emptyP.style.display='block'; tableP.style.display='none';
+  } else {
+    emptyP.style.display='none'; tableP.style.display='table';
+    bodyP.innerHTML = pendentes.map(r => {
+      const dias = calcularDiasEspera(r.tsEntrada);
+      const diasClass = dias === 0 ? 'dias-ok' : dias <= 2 ? 'dias-warn' : 'dias-crit';
+      const diasLabel = dias === 0 ? 'Hoje' : dias + ' dia' + (dias>1?'s':'');
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:12px;">${r.data||''} ${r.hora||''}</td>
+        <td style="font-family:var(--mono);font-weight:600;">${r.nf||'—'}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.fornecedor||''}">${(r.fornecedor||'NÃO INFORMADO').substring(0,30)}${(r.fornecedor||'').length>30?'…':''}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${r.transportadora||'—'}</td>
+        <td><span class="dias-espera ${diasClass}">${diasLabel}</span></td>
+        <td><button class="btn-retirar" onclick="abrirModalRetirada('${r.chave}')">REGISTRAR RETIRADA</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── HISTÓRICO ──
+  let historico = obterRetirados();
+  if(busca) historico = historico.filter(r =>
+    (r.nf||'').toLowerCase().includes(busca) ||
+    (r.fornecedor||'').toLowerCase().includes(busca) ||
+    (r.nomeRetirada||'').toLowerCase().includes(busca) ||
+    (r.matriculaRetirada||'').toLowerCase().includes(busca)
+  );
+
+  const bodyH = document.getElementById('retHistoricoBody');
+  const tableH = document.getElementById('retHistoricoTable');
+  const emptyH = document.getElementById('retHistoricoEmpty');
+
+  if(!historico.length){
+    emptyH.style.display='block'; tableH.style.display='none';
+  } else {
+    emptyH.style.display='none'; tableH.style.display='table';
+    bodyH.innerHTML = historico.map(r => {
+      const espera = r.tsEntrada && r.tsRetirada
+        ? Math.round((r.tsRetirada - r.tsEntrada) / 60000)
+        : null;
+      const esperaStr = espera != null
+        ? espera < 60 ? espera + 'min' : Math.floor(espera/60) + 'h ' + (espera%60) + 'min'
+        : '—';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:12px;">${r.data||''}</td>
+        <td style="font-family:var(--mono);font-weight:600;">${r.nf||'—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.fornecedor||''}">${(r.fornecedor||'').substring(0,25)}${(r.fornecedor||'').length>25?'…':''}</td>
+        <td style="font-family:var(--mono);font-size:12px;">${r.horaRetirada||'—'}</td>
+        <td style="font-weight:500;">${r.nomeRetirada||'—'}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--accent);">${r.matriculaRetirada||'—'}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted);">${esperaStr}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function abrirModalRetirada(chave){
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  const reg = fonte.find(r => r && r.chave === chave);
+  if(!reg) return;
+  retChaveAtual = chave;
+  document.getElementById('retModalNF').textContent = 'NF ' + (reg.nf||'—') + ' · ' + (reg.data||'');
+  document.getElementById('retModalFornecedor').textContent = reg.fornecedor||'';
+  document.getElementById('retNome').value = '';
+  document.getElementById('retMatricula').value = '';
+  document.getElementById('modalRetirada').style.display = 'flex';
+  setTimeout(() => document.getElementById('retNome').focus(), 100);
+}
+
+function fecharModalRetirada(){
+  document.getElementById('modalRetirada').style.display = 'none';
+  retChaveAtual = null;
+}
+
+async function confirmarRetirada(){
+  const nome = document.getElementById('retNome').value.trim();
+  const matricula = document.getElementById('retMatricula').value.trim();
+  if(!nome){ showToast('Informe o nome de quem está retirando.','warn'); document.getElementById('retNome').focus(); return; }
+  if(!matricula){ showToast('Informe a matrícula.','warn'); document.getElementById('retMatricula').focus(); return; }
+
+  const agora = new Date();
+  const horaRetirada = agora.toLocaleTimeString('pt-BR');
+  const tsRetirada = agora.getTime();
+
+  // Atualizar localmente em registros e todosOsDadosNuvem
+  [registros, todosOsDadosNuvem].forEach(arr => {
+    const r = arr.find(x => x && x.chave === retChaveAtual);
+    if(r){
+      r.statusRetirada = 'RETIRADO';
+      r.nomeRetirada = nome.toUpperCase();
+      r.matriculaRetirada = matricula.toUpperCase();
+      r.horaRetirada = horaRetirada;
+      r.tsRetirada = tsRetirada;
+    }
+  });
+  persistir();
+  renderLog();
+
+  // Salvar no histórico local
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  const reg = fonte.find(r => r && r.chave === retChaveAtual);
+  if(reg){
+    retiradas.unshift({...reg});
+    localStorage.setItem('portaria_retiradas', JSON.stringify(retiradas));
+  }
+
+  // Enviar update para Google Sheets
+  const payload = {
+    tipo: 'retirada',
+    chave: retChaveAtual,
+    statusRetirada: 'RETIRADO',
+    nomeRetirada: nome.toUpperCase(),
+    matriculaRetirada: matricula.toUpperCase(),
+    horaRetirada: horaRetirada,
+    tsRetirada: tsRetirada
+  };
+
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 15000);
+    const resp = await fetch(GOOGLE_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      signal: ctrl.signal
+    });
+    clearTimeout(tid);
+    if(resp.ok) showToast('Retirada registrada com sucesso!', 'success');
+    else showToast('Salvo localmente. Falha ao sincronizar com Sheets.', 'warn');
+  } catch(e){
+    showToast('Salvo localmente. Sem conexão com Sheets.', 'warn');
+  }
+
+  fecharModalRetirada();
+  renderRetiradas();
+  atualizarBadgeRetiradas();
+}
+
 function limpar(){
   txtChave.value='';
   tsChaveDetectada = null; // reseta o timestamp para o próximo registro
@@ -787,7 +1420,7 @@ function limpar(){
   document.getElementById('chaveCounter').textContent='0/44';
   document.getElementById('chaveProgress').style.width='0%';
   txtChave.classList.remove('valid'); setSupplierStatus('');
-  ['chkProprio','chkDePara','chkAjuste'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['chkProprio','chkDePara','chkAjuste','chkRetirada'].forEach(id=>document.getElementById(id).classList.remove('active'));
   cancelTimer(); txtChave.focus();
 }
 
@@ -811,7 +1444,7 @@ function renderLog(){
       const dc=r.deltaMin==null?'var(--text-muted)':r.deltaMin<=15?'var(--green)':r.deltaMin<=45?'var(--amber)':'var(--red)';
       ajusteCell=`<div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;font-weight:500;">${r.horaAjuste}</span><span style="font-size:10px;color:${dc};">⏱ ${r.deltaMin??'?'} min após entrada</span></div>`;
     }
-    const flags=[r.dePara==='SIM'?'<span class="badge badge-blue">DE/PARA</span>':''].filter(Boolean).join(' ')||'<span style="color:var(--text-dim)">—</span>';
+    const flags=[r.dePara==='SIM'?'<span class="badge badge-blue">DE/PARA</span>':'', r.aguardaRetirada==='SIM'&&r.statusRetirada==='PENDENTE'?'<span class="badge" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.3);">AGUARDA RET.</span>':'', r.statusRetirada==='RETIRADO'?'<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(61,220,151,.3);">RETIRADO</span>':''].filter(Boolean).join(' ')||'<span style="color:var(--text-dim)">—</span>';
     return `<tr><td>${hFmt}</td><td style="font-weight:500;">${nfFmt}</td><td title="${fFmt}">${fFmt.substring(0,28)}${fFmt.length>28?'…':''}</td><td title="${tFmt}">${tFmt.substring(0,18)}${tFmt.length>18?'…':''}</td><td>${jBadge}</td><td>${ajusteCell}</td><td>${flags}</td></tr>`;
   }).join('');
 }
@@ -1061,6 +1694,7 @@ async function carregarDadosDoGoogle() {
 }
 
 renderLog();
+atualizarBadgeRetiradas();
 document.getElementById('txtChave').focus();
 carregarDadosDoGoogle();
 </script>
