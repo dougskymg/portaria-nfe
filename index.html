@@ -1383,7 +1383,7 @@ async function confirmarRetiradasLote(){
   for(let i = 0; i < selecionadas.length; i++){
     const chave = selecionadas[i].dataset.chave;
     const agora = new Date();
-    const horaRetirada = agora.toLocaleTimeString('pt-BR');
+    const horaRetirada = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
     const tsRetirada = agora.getTime();
 
     // Atualizar localmente
@@ -1533,7 +1533,7 @@ async function confirmarRetirada(){
   if(!matricula){ showToast('Informe a matrícula.','warn'); document.getElementById('retMatricula').focus(); return; }
 
   const agora = new Date();
-  const horaRetirada = agora.toLocaleTimeString('pt-BR');
+  const horaRetirada = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
   const tsRetirada = agora.getTime();
 
   // Atualizar localmente em registros e todosOsDadosNuvem
@@ -1683,34 +1683,13 @@ function renderDashboard(){
   const anoAtual = agora.getFullYear();
   const hojeStr = agora.toLocaleDateString('pt-BR'); // DD/MM/AAAA
 
-  // Normaliza qualquer registro para obter dia, mês e ano
+  // Dados já normalizados para DD/MM/AAAA em carregarDadosDoGoogle
   function parsearData(r) {
     if(!r || !r.data) return null;
     const d = r.data;
-    // Formato DD/MM/AAAA
     if(/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
       const [dia, mes, ano] = d.split('/');
-      return { dia: parseInt(dia), mes: parseInt(mes), ano: parseInt(ano), str: d };
-    }
-    // Formato ISO 2026-05-28T... ou 2026-05-28
-    if(/^\d{4}-\d{2}-\d{2}/.test(d)) {
-      const dt = new Date(d);
-      if(!isNaN(dt)) {
-        const dia = dt.getDate();
-        const mes = dt.getMonth() + 1;
-        const ano = dt.getFullYear();
-        return { dia, mes, ano, str: String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano };
-      }
-    }
-    // Formato com tsEntrada como fallback
-    if(r.tsEntrada) {
-      const dt = new Date(Number(r.tsEntrada));
-      if(!isNaN(dt)) {
-        const dia = dt.getDate();
-        const mes = dt.getMonth() + 1;
-        const ano = dt.getFullYear();
-        return { dia, mes, ano, str: String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano };
-      }
+      return { dia: parseInt(dia), mes: parseInt(mes), ano: parseInt(ano) };
     }
     return null;
   }
@@ -1787,19 +1766,9 @@ function renderDashboard(){
   }
 
   todosOsDadosNuvem.forEach(r => {
-    if(!r) return;
-    let dataR = r.data;
-    // Normaliza para DD/MM/AAAA com zero à esquerda
-    if(dataR && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dataR)) {
-      const partes = dataR.split('/');
-      dataR = partes[0].padStart(2,'0') + '/' + partes[1].padStart(2,'0') + '/' + partes[2];
-    } else if(!dataR || /^\d{4}-/.test(dataR)) {
-      if(r.tsEntrada) {
-        const dt = new Date(Number(r.tsEntrada));
-        if(!isNaN(dt)) dataR = fmtData(dt);
-      }
-    }
-    if(dataR && contagemTrend[dataR] !== undefined) contagemTrend[dataR]++;
+    if(!r || !r.data) return;
+    // dados já normalizados para DD/MM/AAAA em carregarDadosDoGoogle
+    if(contagemTrend[r.data] !== undefined) contagemTrend[r.data]++;
   });
   const maxTrend = Math.max(...Object.values(contagemTrend), 1);
   const totalOntem = contagemTrend[listaDias[1]] || 0;
@@ -1960,14 +1929,7 @@ async function carregarDadosDoGoogle() {
     });
 
     // Popular histórico de retiradas com registros já retirados na planilha
-    // DIAGNÓSTICO: verificar datas de 25/05
-    const reg25 = todosOsDadosNuvem.filter(r => r && r.data && r.data.includes('25/05'));
-    console.log('[DIAGNÓSTICO] Registros com data 25/05:', reg25.length);
-    if(reg25.length === 0) {
-      const amostra = todosOsDadosNuvem.slice(0,3).map(r => r && r.data);
-      console.log('[DIAGNÓSTICO] Amostra de datas após normalização:', amostra);
-    }
-    // FIM DIAGNÓSTICO
+
     const retiiradasNuvem = todosOsDadosNuvem.filter(r => r && r.statusRetirada === 'RETIRADO');
     if(retiiradasNuvem.length) {
       const chavesRetiradas = new Set(retiradas.map(r => r && r.chave));
