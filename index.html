@@ -1775,11 +1775,14 @@ function renderDashboard(){
   listaDiasStr.forEach(dia => contagemTrend[dia] = 0);
   todosOsDadosNuvem.forEach(r => {
     if(!r) return;
-    // Normaliza a data do registro para DD/MM/AAAA
+    // Prioriza o campo data (já normalizado para DD/MM/AAAA na carga)
     let dataR = r.data;
-    if(r.tsEntrada && (!dataR || /^\d{4}-/.test(dataR))) {
-      const dt = new Date(Number(r.tsEntrada));
-      if(!isNaN(dt)) dataR = dt.toLocaleDateString('pt-BR');
+    // Só usa tsEntrada se data estiver ausente ou em formato ISO
+    if(!dataR || /^\d{4}-/.test(dataR)) {
+      if(r.tsEntrada) {
+        const dt = new Date(Number(r.tsEntrada));
+        if(!isNaN(dt)) dataR = dt.toLocaleDateString('pt-BR');
+      }
     }
     if(dataR && contagemTrend[dataR] !== undefined) contagemTrend[dataR]++;
   });
