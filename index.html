@@ -1925,27 +1925,10 @@ async function carregarDadosDoGoogle() {
       todosOsDadosNuvem = [];
     }
 
-    // Desduplicar por chave+data — mesma NF pode aparecer em dias diferentes (lotes retroativos)
-    const chavesVistas = new Set();
-    todosOsDadosNuvem = todosOsDadosNuvem.filter(r => {
-      if(!r || !r.chave) return false;
-      // Normaliza a data antes de usar como chave de deduplicação
-      let dataKey = r.data || '';
-      if(/^\d{4}-/.test(dataKey)) {
-        const partes = dataKey.substring(0,10).split('-');
-        dataKey = partes[2] + '/' + partes[1] + '/' + partes[0];
-      }
-      const key = r.chave + '|' + dataKey;
-      if(chavesVistas.has(key)) return false;
-      chavesVistas.add(key);
-      return true;
-    });
-
-    // Normalizar campo data para DD/MM/AAAA em todos os registros
+    // Normalizar campo data e hora ANTES de deduplicar
     todosOsDadosNuvem = todosOsDadosNuvem.map(r => {
       if(!r) return r;
       if(!r.data || r.data === '') {
-        // Sem data: usa tsEntrada como fallback
         if(r.tsEntrada) {
           const dt = new Date(Number(r.tsEntrada));
           if(!isNaN(dt)) {
@@ -1953,21 +1936,27 @@ async function carregarDadosDoGoogle() {
           }
         }
       } else if(/^\d{4}-/.test(r.data)) {
-        // Formato ISO (2026-05-25T03:00:00.000Z): extrai a data diretamente da string sem converter timezone
         const partes = r.data.substring(0,10).split('-');
         r.data = partes[2] + '/' + partes[1] + '/' + partes[0];
       } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(r.data)) {
-        // Formato BR já existente: garante zero à esquerda
         const p = r.data.split('/');
         r.data = p[0].padStart(2,'0') + '/' + p[1].padStart(2,'0') + '/' + p[2];
       }
-      // Normalizar campo hora se vier como ISO serial do Sheets (1899-12-30T...)
       if(r.hora && typeof r.hora === 'string' && r.hora.startsWith('1899-12-30T')) {
-        // Extrai HH:MM:SS da string ISO
         const match = r.hora.match(/T(\d{2}):(\d{2}):(\d{2})/);
         if(match) r.hora = match[1] + ':' + match[2] + ':' + match[3];
       }
       return r;
+    });
+
+    // Desduplicar por chave+data — mesma NF pode aparecer em dias diferentes
+    const chavesVistas = new Set();
+    todosOsDadosNuvem = todosOsDadosNuvem.filter(r => {
+      if(!r || !r.chave) return false;
+      const key = r.chave + '|' + (r.data || '');
+      if(chavesVistas.has(key)) return false;
+      chavesVistas.add(key);
+      return true;
     });
 
     // Popular histórico de retiradas com registros já retirados na planilha
