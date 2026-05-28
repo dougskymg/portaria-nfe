@@ -1677,18 +1677,63 @@ function renderDashboard(){
   if (!Array.isArray(todosOsDadosNuvem)) return;
   const filtro = document.getElementById('selMesDash').value;
   const agora = new Date();
-  const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0') + '/' + agora.getFullYear();
-  const hojeStr = agora.toLocaleDateString('pt-BR');
+  const mesAtual = agora.getMonth() + 1;
+  const anoAtual = agora.getFullYear();
+  const hojeStr = agora.toLocaleDateString('pt-BR'); // DD/MM/AAAA
+
+  // Normaliza qualquer registro para obter dia, mês e ano
+  function parsearData(r) {
+    if(!r || !r.data) return null;
+    const d = r.data;
+    // Formato DD/MM/AAAA
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+      const [dia, mes, ano] = d.split('/');
+      return { dia: parseInt(dia), mes: parseInt(mes), ano: parseInt(ano), str: d };
+    }
+    // Formato ISO 2026-05-28T... ou 2026-05-28
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)) {
+      const dt = new Date(d);
+      if(!isNaN(dt)) {
+        const dia = dt.getDate();
+        const mes = dt.getMonth() + 1;
+        const ano = dt.getFullYear();
+        return { dia, mes, ano, str: String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano };
+      }
+    }
+    // Formato com tsEntrada como fallback
+    if(r.tsEntrada) {
+      const dt = new Date(Number(r.tsEntrada));
+      if(!isNaN(dt)) {
+        const dia = dt.getDate();
+        const mes = dt.getMonth() + 1;
+        const ano = dt.getFullYear();
+        return { dia, mes, ano, str: String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano };
+      }
+    }
+    return null;
+  }
 
   let dadosFiltrados = [];
   if (filtro === 'atual') {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => r && r.data && r.data.includes('/' + mesAtualStr));
+    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+      const p = parsearData(r);
+      return p && p.mes === mesAtual && p.ano === anoAtual;
+    });
   } else if (filtro === 'hoje') {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => r && r.data === hojeStr);
+    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+      const p = parsearData(r);
+      if(!p) return false;
+      return p.dia === agora.getDate() && p.mes === mesAtual && p.ano === anoAtual;
+    });
   } else if (filtro === 'todos') {
     dadosFiltrados = todosOsDadosNuvem.filter(r => r !== null);
   } else {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => r && r.data && (r.data.includes('/' + filtro) || r.data.includes('/' + filtro.split('/')[0] + '/' + filtro.split('/')[1].substring(2))));
+    // filtro específico ex: "05/2026"
+    const [mesFiltro, anoFiltro] = filtro.split('/').map(Number);
+    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+      const p = parsearData(r);
+      return p && p.mes === mesFiltro && p.ano === anoFiltro;
+    });
   }
 
   const selectEl = document.getElementById('selMesDash');
@@ -1714,19 +1759,30 @@ function renderDashboard(){
 
   const listaDias = [];
   const labelsDias = [];
+  const listaDiasStr = []; // formato DD/MM/AAAA para comparação
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dataFmt = d.toLocaleDateString('pt-BR');
     listaDias.push(dataFmt);
+    listaDiasStr.push(dataFmt);
     if (i === 0) labelsDias.push("Hoje");
     else if (i === 1) labelsDias.push("Ontem");
     else labelsDias.push(`${diasSemana[d.getDay()]} (${dataFmt.substring(0,5)})`);
   }
   const contagemTrend = {};
-  listaDias.forEach(dia => contagemTrend[dia] = 0);
-  todosOsDadosNuvem.forEach(r => { if (r && contagemTrend[r.data] !== undefined) contagemTrend[r.data]++; });
+  listaDiasStr.forEach(dia => contagemTrend[dia] = 0);
+  todosOsDadosNuvem.forEach(r => {
+    if(!r) return;
+    // Normaliza a data do registro para DD/MM/AAAA
+    let dataR = r.data;
+    if(r.tsEntrada && (!dataR || /^\d{4}-/.test(dataR))) {
+      const dt = new Date(Number(r.tsEntrada));
+      if(!isNaN(dt)) dataR = dt.toLocaleDateString('pt-BR');
+    }
+    if(dataR && contagemTrend[dataR] !== undefined) contagemTrend[dataR]++;
+  });
   const maxTrend = Math.max(...Object.values(contagemTrend), 1);
   const totalOntem = contagemTrend[listaDias[1]] || 0;
   document.getElementById('txtTrendComparativo').textContent = `Ontem: ${totalOntem} NF${totalOntem !== 1 ? 's' : ''}`;
@@ -1850,6 +1906,16 @@ async function carregarDadosDoGoogle() {
     if(!Array.isArray(todosOsDadosNuvem)) {
       todosOsDadosNuvem = [];
     }
+
+    // Normalizar campo data para DD/MM/AAAA em todos os registros
+    todosOsDadosNuvem = todosOsDadosNuvem.map(r => {
+      if(!r) return r;
+      if(r.tsEntrada && (!r.data || /^\d{4}-/.test(r.data) || r.data === '')) {
+        const dt = new Date(Number(r.tsEntrada));
+        if(!isNaN(dt)) r.data = dt.toLocaleDateString('pt-BR');
+      }
+      return r;
+    });
     
     const hoje = new Date().toLocaleDateString('pt-BR');
     registros = todosOsDadosNuvem.filter(r => r && (r.data === hoje || r.data === hoje.substring(0,6)+hoje.split('/')[2].substring(2))); 
