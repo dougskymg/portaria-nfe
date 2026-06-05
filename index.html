@@ -1912,13 +1912,18 @@ async function carregarDadosDoGoogle() {
         r.data = p[0].padStart(2,'0') + '/' + p[1].padStart(2,'0') + '/' + p[2];
       }
       if(r.hora && typeof r.hora === 'string' && r.hora.startsWith('1899-12-30T')) {
-        const match = r.hora.match(/T(\d{2}):(\d{2}):(\d{2})/);
-        if(match) r.hora = match[1] + ':' + match[2] + ':' + match[3];
+        const dt = new Date(r.hora);
+        if(!isNaN(dt)) r.hora = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
       }
       // horaRetirada pode vir como serial 1899-12-30T... do Sheets
       if(r.horaRetirada && typeof r.horaRetirada === 'string' && r.horaRetirada.startsWith('1899-12-30T')) {
-        const match = r.horaRetirada.match(/T(\d{2}):(\d{2}):(\d{2})/);
-        if(match) r.horaRetirada = r.data + ' ' + match[1] + ':' + match[2] + ':' + match[3];
+        const dt = new Date(r.horaRetirada);
+        if(!isNaN(dt)) r.horaRetirada = (r.data||'') + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
+      }
+      // horaAjuste pode vir como serial 1899-12-30T... do Sheets
+      if(r.horaAjuste && typeof r.horaAjuste === 'string' && r.horaAjuste.startsWith('1899-12-30T')) {
+        const dt = new Date(r.horaAjuste);
+        if(!isNaN(dt)) r.horaAjuste = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
       }
       return r;
     });
