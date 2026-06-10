@@ -282,8 +282,12 @@
       print-color-adjust: exact;
       padding: 8mm !important;
     }
-    .header, .nav-tabs, .toast-container, .timer-bar, .log-clear, #pagePortaria, #areaFiltrosPrint,
-    #panelCopalog, #panelDePara, #panelTopTransportadoras { 
+    /* Esconder tudo que não é dashboard */
+    .header, .nav-tabs, .toast-container, .timer-bar, .log-clear, 
+    #pagePortaria, #pageRetiradas, #pagePendencias,
+    #areaFiltrosPrint, #rowCopalogDePara, #panelTopTransportadoras,
+    .modal-overlay, .btn-salvar, .btn-lote, .avanco-panel,
+    [onclick="window.print()"] { 
       display: none !important; 
     }
     .page, #pageDashboard, .dash-wrap { 
@@ -326,6 +330,8 @@
       flex-direction: column !important; 
       gap: 20px !important; 
     }
+    #rowHeatmapTransp { display: grid !important; grid-template-columns: 1fr !important; }
+    #panelHeatmap { grid-column: 1 / -1 !important; width: 100% !important; }
     .dash-panel { 
       background: #ffffff !important; 
       border: 1px solid #cbd5e1 !important; 
@@ -669,7 +675,7 @@
       </div>
     </div>
 
-    <div class="dash-2col">
+    <div class="dash-2col" id="rowCopalogDePara">
       <div class="dash-panel" id="panelCopalog">
         <div class="dash-panel-header">
           <span class="dash-panel-title">⚠ COPALOG — Chegadas Fora da Janela</span>
@@ -699,8 +705,8 @@
       </div>
     </div>
 
-    <div class="dash-2col">
-      <div class="dash-panel">
+    <div class="dash-2col" id="rowHeatmapTransp">
+      <div class="dash-panel" id="panelHeatmap">
         <div class="dash-panel-header">
           <span class="dash-panel-title">Volume de NF por Hora</span>
         </div>
