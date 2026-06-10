@@ -15,6 +15,7 @@
     --amber:#f5a623; --amber-dim:rgba(245,166,35,0.12);
     --red:#ff5a5a; --red-dim:rgba(255,90,90,0.12);
     --purple:#a78bfa; --purple-dim:rgba(167,139,250,0.12);
+    --orange:#FF6B05; --orange-dim:rgba(255,107,5,0.12);
     --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
     --radius:6px; --radius-lg:10px;
   }
@@ -49,6 +50,23 @@
 
 
   /* ── PURPLE CHECK (Aguarda Retirada) ── */
+  /* ── ORANGE CHECK (Entrada em Avanço) ── */
+  .orange-check .check-dot { border-color: var(--orange); }
+  .orange-check.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+  .orange-check.active .check-dot { background: var(--orange); border-color: var(--orange); }
+  .orange-check.active .check-dot svg { stroke: #fff; opacity: 1; }
+
+  /* ── PAINEL COMPRADOR AVANÇO ── */
+  .avanco-panel { display:none; margin-top:8px; padding:12px 14px; background:var(--surface2); border:1px solid var(--orange); border-radius:var(--radius); animation:fadeIn .2s; }
+  .avanco-panel.show { display:block; }
+  .avanco-panel label { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--orange); margin-bottom:4px; display:block; }
+  .avanco-select { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 10px; font-family:var(--sans); font-size:13px; color:var(--text); outline:none; cursor:pointer; }
+  .avanco-select:focus { border-color:var(--orange); }
+  .avanco-input { display:none; margin-top:8px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 10px; font-family:var(--sans); font-size:13px; color:var(--text); outline:none; }
+  .avanco-input.show { display:block; }
+  .avanco-input:focus { border-color:var(--orange); }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
   .purple-check .check-dot { border-color: var(--purple); }
   .purple-check.active { background: var(--purple-dim); border-color: var(--purple); color: var(--purple); }
   .purple-check.active .check-dot { background: var(--purple); border-color: var(--purple); }
@@ -428,6 +446,26 @@
             <div class="check-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
             Aguarda Retirada
           </div>
+          <div class="check-item orange-check" id="chkAvanco" onclick="toggleCheck('chkAvanco'); toggleAvancoPanel()">
+            <div class="check-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+            Entrada em Avanço
+          </div>
+        </div>
+
+        <div class="avanco-panel" id="avancoPanel">
+          <label>Comprador Responsável</label>
+          <select class="avanco-select" id="selComprador" onchange="toggleCompradorOutro()">
+            <option value="">Selecione o comprador...</option>
+            <option value="THAYNARA">THAYNARA</option>
+            <option value="RONIO">RONIO</option>
+            <option value="DANIELLE">DANIELLE</option>
+            <option value="LUANA">LUANA</option>
+            <option value="ROBERT">ROBERT</option>
+            <option value="CAMILA">CAMILA</option>
+            <option value="NIVIA">NIVIA</option>
+            <option value="__OUTRO__">Outro (digitar)</option>
+          </select>
+          <input type="text" class="avanco-input" id="txtCompradorOutro" placeholder="Nome do comprador..." autocomplete="off">
         </div>
 
         <div class="timer-bar" id="timerBar">
@@ -694,6 +732,22 @@
     </div>
 
     <!-- PENDENTES -->
+    <!-- ENTRADAS EM AVANÇO -->
+    <div class="ret-section">
+      <div class="ret-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        ENTRADA EM AVANÇO — PENDENTE DE REGULARIZAÇÃO
+        <span id="avancoPendenteBadge" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,5,.3);font-family:var(--mono);font-size:11px;padding:2px 10px;border-radius:12px;display:none;margin-left:8px;">0</span>
+      </div>
+      <div id="avancoEmpty" class="ret-empty">Nenhuma entrada em avanço pendente</div>
+      <table class="ret-table" id="avancoTable" style="display:none;">
+        <thead><tr>
+          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Comprador</th><th>Dias Pendente</th><th>Status</th>
+        </tr></thead>
+        <tbody id="avancoBody"></tbody>
+      </table>
+    </div>
+
     <div class="ret-section">
       <div class="ret-section-title">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -812,6 +866,34 @@
   </div>
 </div>
 
+<!-- MODAL REGULARIZAÇÃO AVANÇO -->
+<div class="modal-overlay" id="modalRegularizacao" style="display:none;">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title" style="color:var(--orange);">Regularizar Entrada em Avanço</span>
+      <button class="modal-close" onclick="fecharModalRegularizacao()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface2);border:1px solid var(--orange);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-bottom:6px;">NF COM ENTRADA EM AVANÇO PENDENTE</div>
+        <div id="regAvNF" style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);"></div>
+        <div id="regAvFornecedor" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+        <div id="regAvComprador" style="font-size:12px;color:var(--orange);margin-top:4px;"></div>
+        <div id="regAvData" style="font-size:11px;color:var(--text-muted);margin-top:4px;font-family:var(--mono);"></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-salvar" style="flex:1;background:var(--orange);border-color:var(--orange);" onclick="confirmarRegularizacao()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          REGULARIZAR AGORA
+        </button>
+        <button class="btn-lote" style="flex:1;" onclick="registrarNormalSemRegularizar()">
+          NOVO REGISTRO
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
@@ -886,10 +968,13 @@ async function onChaveChange() {
   document.getElementById('chaveCounter').textContent = `${len}/44`;
   document.getElementById('chaveProgress').style.width = `${(len/44)*100}%`;
   if (len === 44) {
-    tsChaveDetectada = new Date(); // registra o momento real de chegada da NF
+    tsChaveDetectada = new Date();
     txtChave.classList.add('valid');
     document.getElementById('txtNF').value = chave.substring(25,34);
     await buscarFornecedor(chave.substring(6,20));
+    // Detectar se é rebipagem de Entrada em Avanço pendente
+    if(detectarEntradaAvanco(chave)) return;
+    ignorarDeteccaoAvanco = false;
     startAutoTimer();
   } else {
     txtChave.classList.remove('valid');
@@ -984,6 +1069,11 @@ async function salvar(auto=false) {
     document.getElementById('txtChave').focus();
     return;
   }
+  if(getCheck('chkAvanco') && !getCompradorAvanco()){
+    showToast('Selecione o comprador responsável para Entrada em Avanço!','warn');
+    document.getElementById('selComprador').focus();
+    return;
+  }
   
   try {
     if (btnSalvar) btnSalvar.disabled = true;
@@ -1024,7 +1114,11 @@ async function salvar(auto=false) {
       chave, cnpj:chave.substring(6,20),
       aguardaRetirada:getCheck('chkRetirada')?'SIM':'NÃO',
       statusRetirada:getCheck('chkRetirada')?'PENDENTE':'',
-      nomeRetirada:'', matriculaRetirada:'', horaRetirada:'', tsRetirada:null
+      nomeRetirada:'', matriculaRetirada:'', horaRetirada:'', tsRetirada:null,
+      entradaAvanco:getCheck('chkAvanco')?'SIM':'NÃO',
+      compradorAvanco:getCheck('chkAvanco')?getCompradorAvanco():'',
+      statusAvanco:getCheck('chkAvanco')?'PENDENTE':'',
+      horaRegularizacao:'', tsRegularizacao:null
     };
 
     const controller = new AbortController();
@@ -1439,7 +1533,45 @@ function renderRetiradas(){
   atualizarBadgeRetiradas();
   const busca = (document.getElementById('retBusca')||{value:''}).value.toLowerCase();
 
-  // ── PENDENTES ──
+  // ── ENTRADA EM AVANÇO ──
+  let avancos = obterPendentesAvanco();
+  if(busca) avancos = avancos.filter(r =>
+    (r.nf||'').toLowerCase().includes(busca) ||
+    (r.fornecedor||'').toLowerCase().includes(busca) ||
+    (r.compradorAvanco||'').toLowerCase().includes(busca)
+  );
+
+  const bodyAv = document.getElementById('avancoBody');
+  const tableAv = document.getElementById('avancoTable');
+  const emptyAv = document.getElementById('avancoEmpty');
+  const badgeAv = document.getElementById('avancoPendenteBadge');
+
+  const totalAvPendentes = obterPendentesAvanco().length;
+  if(badgeAv){
+    if(totalAvPendentes > 0){ badgeAv.textContent = totalAvPendentes + ' pendente' + (totalAvPendentes>1?'s':''); badgeAv.style.display = 'inline-block'; }
+    else { badgeAv.style.display = 'none'; }
+  }
+
+  if(!avancos.length){
+    emptyAv.style.display='block'; tableAv.style.display='none';
+  } else {
+    emptyAv.style.display='none'; tableAv.style.display='table';
+    bodyAv.innerHTML = avancos.map(r => {
+      const dias = calcularDiasEspera(r.tsEntrada);
+      const diasClass = dias === 0 ? 'dias-ok' : dias <= 2 ? 'dias-warn' : 'dias-crit';
+      const diasLabel = dias === 0 ? 'Hoje' : dias + ' dia' + (dias>1?'s':'');
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:12px;">${r.data||''} ${r.hora||''}</td>
+        <td style="font-family:var(--mono);font-weight:600;">${r.nf||'—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.fornecedor||''}">${(r.fornecedor||'—').substring(0,25)}${(r.fornecedor||'').length>25?'…':''}</td>
+        <td style="color:var(--orange);font-weight:500;">${r.compradorAvanco||'—'}</td>
+        <td><span class="dias-espera ${diasClass}">${diasLabel}</span></td>
+        <td><span class="badge" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,5,.3);">PENDENTE</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── PENDENTES RETIRADA ──
   let pendentes = obterPendentes();
   if(busca) pendentes = pendentes.filter(r =>
     (r.nf||'').toLowerCase().includes(busca) ||
@@ -1590,6 +1722,129 @@ async function confirmarRetirada(){
   atualizarBadgeRetiradas();
 }
 
+
+// ══════════════════════════════════════════════
+// ENTRADA EM AVANÇO
+// ══════════════════════════════════════════════
+let regAvChaveAtual = null;
+let ignorarDeteccaoAvanco = false;
+
+function toggleAvancoPanel(){
+  const panel = document.getElementById('avancoPanel');
+  if(getCheck('chkAvanco')){
+    panel.classList.add('show');
+    document.getElementById('selComprador').focus();
+  } else {
+    panel.classList.remove('show');
+    document.getElementById('selComprador').value = '';
+    document.getElementById('txtCompradorOutro').value = '';
+    document.getElementById('txtCompradorOutro').classList.remove('show');
+  }
+}
+
+function toggleCompradorOutro(){
+  const sel = document.getElementById('selComprador');
+  const inp = document.getElementById('txtCompradorOutro');
+  if(sel.value === '__OUTRO__'){
+    inp.classList.add('show');
+    inp.focus();
+  } else {
+    inp.classList.remove('show');
+    inp.value = '';
+  }
+}
+
+function getCompradorAvanco(){
+  const sel = document.getElementById('selComprador').value;
+  if(sel === '__OUTRO__') return (document.getElementById('txtCompradorOutro').value || '').toUpperCase().trim();
+  return sel;
+}
+
+function detectarEntradaAvanco(chave){
+  if(ignorarDeteccaoAvanco) return false;
+  // Busca em todos os dados (nuvem + local)
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  const reg = fonte.find(r => r && r.chave === chave && r.entradaAvanco === 'SIM' && r.statusAvanco === 'PENDENTE');
+  if(reg){
+    regAvChaveAtual = chave;
+    document.getElementById('regAvNF').textContent = 'NF ' + (reg.nf||'—');
+    document.getElementById('regAvFornecedor').textContent = reg.fornecedor || '';
+    document.getElementById('regAvComprador').textContent = 'Comprador: ' + (reg.compradorAvanco || '—');
+    document.getElementById('regAvData').textContent = 'Registrada em: ' + (reg.data||'') + ' ' + (reg.hora||'');
+    document.getElementById('modalRegularizacao').style.display = 'flex';
+    cancelTimer();
+    return true;
+  }
+  return false;
+}
+
+function fecharModalRegularizacao(){
+  document.getElementById('modalRegularizacao').style.display = 'none';
+  regAvChaveAtual = null;
+  limpar();
+}
+
+async function confirmarRegularizacao(){
+  if(!regAvChaveAtual) return;
+  const agora = new Date();
+  const horaReg = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
+  const tsReg = agora.getTime();
+
+  // Atualizar localmente
+  [registros, todosOsDadosNuvem].forEach(arr => {
+    const r = arr.find(x => x && x.chave === regAvChaveAtual && x.entradaAvanco === 'SIM' && x.statusAvanco === 'PENDENTE');
+    if(r){
+      r.statusAvanco = 'REGULARIZADO';
+      r.horaRegularizacao = horaReg;
+      r.tsRegularizacao = tsReg;
+    }
+  });
+  persistir();
+  renderLog();
+
+  // Enviar para Sheets
+  const payload = {
+    tipo: 'regularizacao',
+    chave: regAvChaveAtual,
+    statusAvanco: 'REGULARIZADO',
+    horaRegularizacao: horaReg,
+    tsRegularizacao: tsReg
+  };
+
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 15000);
+    const resp = await fetch(GOOGLE_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      signal: ctrl.signal
+    });
+    clearTimeout(tid);
+    if(resp.ok) showToast('Entrada em Avanço regularizada!', 'success');
+    else showToast('Salvo localmente. Falha ao sincronizar.', 'warn');
+  } catch(e){
+    showToast('Salvo localmente. Sem conexão com Sheets.', 'warn');
+  }
+
+  fecharModalRegularizacao();
+  atualizarBadgeRetiradas();
+}
+
+function registrarNormalSemRegularizar(){
+  document.getElementById('modalRegularizacao').style.display = 'none';
+  regAvChaveAtual = null;
+  ignorarDeteccaoAvanco = true;
+  // Reprocessa a chave como novo registro
+  const chave = document.getElementById('txtChave').value;
+  if(chave) startAutoTimer();
+}
+
+function obterPendentesAvanco(){
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  return fonte.filter(r => r && r.entradaAvanco === 'SIM' && r.statusAvanco === 'PENDENTE');
+}
+
 function limpar(){
   txtChave.value='';
   tsChaveDetectada = null; // reseta o timestamp para o próximo registro
@@ -1598,7 +1853,12 @@ function limpar(){
   document.getElementById('chaveCounter').textContent='0/44';
   document.getElementById('chaveProgress').style.width='0%';
   txtChave.classList.remove('valid'); setSupplierStatus('');
-  ['chkProprio','chkDePara','chkAjuste','chkRetirada'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['chkProprio','chkDePara','chkAjuste','chkRetirada','chkAvanco'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById('avancoPanel').classList.remove('show');
+  document.getElementById('selComprador').value='';
+  document.getElementById('txtCompradorOutro').value='';
+  document.getElementById('txtCompradorOutro').classList.remove('show');
+  ignorarDeteccaoAvanco = false;
   cancelTimer(); txtChave.focus();
 }
 
@@ -1622,7 +1882,7 @@ function renderLog(){
       const dc=r.deltaMin==null?'var(--text-muted)':r.deltaMin<=15?'var(--green)':r.deltaMin<=45?'var(--amber)':'var(--red)';
       ajusteCell=`<div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;font-weight:500;">${r.horaAjuste}</span><span style="font-size:10px;color:${dc};">⏱ ${r.deltaMin??'?'} min após entrada</span></div>`;
     }
-    const flags=[r.dePara==='SIM'?'<span class="badge badge-blue">DE/PARA</span>':'', r.aguardaRetirada==='SIM'&&r.statusRetirada==='PENDENTE'?'<span class="badge" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.3);">AGUARDA RET.</span>':'', r.statusRetirada==='RETIRADO'?'<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(61,220,151,.3);">RETIRADO</span>':''].filter(Boolean).join(' ')||'<span style="color:var(--text-dim)">—</span>';
+    const flags=[r.dePara==='SIM'?'<span class="badge badge-blue">DE/PARA</span>':'', r.aguardaRetirada==='SIM'&&r.statusRetirada==='PENDENTE'?'<span class="badge" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.3);">AGUARDA RET.</span>':'', r.statusRetirada==='RETIRADO'?'<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(61,220,151,.3);">RETIRADO</span>':'', r.entradaAvanco==='SIM'&&r.statusAvanco==='PENDENTE'?'<span class="badge" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,5,.3);">AVANÇO</span>':'', r.entradaAvanco==='SIM'&&r.statusAvanco==='REGULARIZADO'?'<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(61,220,151,.3);">REGULARIZADO</span>':''].filter(Boolean).join(' ')||'<span style="color:var(--text-dim)">—</span>';
     return `<tr><td>${hFmt}</td><td style="font-weight:500;">${nfFmt}</td><td title="${fFmt}">${fFmt.substring(0,28)}${fFmt.length>28?'…':''}</td><td title="${tFmt}">${tFmt.substring(0,18)}${tFmt.length>18?'…':''}</td><td>${jBadge}</td><td>${ajusteCell}</td><td>${flags}</td></tr>`;
   }).join('');
 }
