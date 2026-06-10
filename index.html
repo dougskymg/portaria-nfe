@@ -74,6 +74,7 @@
 
   /* ── TAB RETIRADAS ── */
   .nav-tab.active.tab-retiradas { color: var(--purple); }
+  .nav-tab.active.tab-pendencias { color: var(--orange); }
 
   /* ── PÁGINA RETIRADAS ── */
   .ret-wrap { max-width:1200px; width:100%; margin:0 auto; padding:24px; display:flex; flex-direction:column; gap:20px; }
@@ -377,6 +378,10 @@
     <button class="nav-tab tab-retiradas" id="tabRetiradas" onclick="setPage('retiradas')">
       <svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
       <span class="tab-label">Retiradas</span>
+    </button>
+    <button class="nav-tab tab-pendencias" id="tabPendencias" onclick="setPage('pendencias')">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span class="tab-label">Pendências</span>
     </button>
   </nav>
 
@@ -717,6 +722,53 @@
   </div>
 </div>
 
+<div class="page" id="pagePendencias">
+  <div class="ret-wrap">
+
+    <div class="ret-header-bar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;">CONTROLE DE PENDÊNCIAS</span>
+        <span id="avancoPendenteBadge" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,5,.3);font-family:var(--mono);font-size:11px;padding:2px 10px;border-radius:12px;display:none;">0</span>
+      </div>
+      <input type="text" id="pendBusca" placeholder="Buscar por NF, fornecedor ou comprador..." oninput="renderPendencias()"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;width:280px;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <!-- PENDENTES DE REGULARIZAÇÃO -->
+    <div class="ret-section">
+      <div class="ret-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        ENTRADA EM AVANÇO — PENDENTE DE REGULARIZAÇÃO
+      </div>
+      <div id="avancoEmpty" class="ret-empty">Nenhuma entrada em avanço pendente</div>
+      <table class="ret-table" id="avancoTable" style="display:none;">
+        <thead><tr>
+          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Comprador</th><th>Dias Pendente</th><th>Status</th>
+        </tr></thead>
+        <tbody id="avancoBody"></tbody>
+      </table>
+    </div>
+
+    <!-- HISTÓRICO DE REGULARIZAÇÕES -->
+    <div class="ret-section">
+      <div class="ret-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        HISTÓRICO DE REGULARIZAÇÕES
+      </div>
+      <div id="avancoHistEmpty" class="ret-empty">Nenhuma regularização registrada</div>
+      <table class="ret-table" id="avancoHistTable" style="display:none;">
+        <thead><tr>
+          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Comprador</th><th>Regularizado em</th><th>Tempo Resolução</th>
+        </tr></thead>
+        <tbody id="avancoHistBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
 <div class="page" id="pageRetiradas">
   <div class="ret-wrap">
 
@@ -732,22 +784,6 @@
     </div>
 
     <!-- PENDENTES -->
-    <!-- ENTRADAS EM AVANÇO -->
-    <div class="ret-section">
-      <div class="ret-section-title">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        ENTRADA EM AVANÇO — PENDENTE DE REGULARIZAÇÃO
-        <span id="avancoPendenteBadge" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,5,.3);font-family:var(--mono);font-size:11px;padding:2px 10px;border-radius:12px;display:none;margin-left:8px;">0</span>
-      </div>
-      <div id="avancoEmpty" class="ret-empty">Nenhuma entrada em avanço pendente</div>
-      <table class="ret-table" id="avancoTable" style="display:none;">
-        <thead><tr>
-          <th>Chegada</th><th>NF</th><th>Fornecedor</th><th>Comprador</th><th>Dias Pendente</th><th>Status</th>
-        </tr></thead>
-        <tbody id="avancoBody"></tbody>
-      </table>
-    </div>
-
     <div class="ret-section">
       <div class="ret-section-title">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -932,6 +968,7 @@ function setPage(p) {
   if(tabEl)  tabEl.classList.add('active');
   if (p === 'dashboard') renderDashboard();
   if (p === 'retiradas') renderRetiradas();
+  if (p === 'pendencias') renderPendencias();
 }
 
 function updateClock() {
@@ -1529,13 +1566,12 @@ async function confirmarRetiradasLote(){
   }, 1200);
 }
 
-function renderRetiradas(){
-  atualizarBadgeRetiradas();
-  const busca = (document.getElementById('retBusca')||{value:''}).value.toLowerCase();
+function renderPendencias(){
+  const busca = (document.getElementById('pendBusca')||{value:''}).value.toLowerCase();
 
-  // ── ENTRADA EM AVANÇO ──
-  let avancos = obterPendentesAvanco();
-  if(busca) avancos = avancos.filter(r =>
+  // ── PENDENTES DE REGULARIZAÇÃO ──
+  let pendentes = obterPendentesAvanco();
+  if(busca) pendentes = pendentes.filter(r =>
     (r.nf||'').toLowerCase().includes(busca) ||
     (r.fornecedor||'').toLowerCase().includes(busca) ||
     (r.compradorAvanco||'').toLowerCase().includes(busca)
@@ -1546,17 +1582,17 @@ function renderRetiradas(){
   const emptyAv = document.getElementById('avancoEmpty');
   const badgeAv = document.getElementById('avancoPendenteBadge');
 
-  const totalAvPendentes = obterPendentesAvanco().length;
+  const totalPend = obterPendentesAvanco().length;
   if(badgeAv){
-    if(totalAvPendentes > 0){ badgeAv.textContent = totalAvPendentes + ' pendente' + (totalAvPendentes>1?'s':''); badgeAv.style.display = 'inline-block'; }
+    if(totalPend > 0){ badgeAv.textContent = totalPend + ' pendente' + (totalPend>1?'s':''); badgeAv.style.display = 'inline-block'; }
     else { badgeAv.style.display = 'none'; }
   }
 
-  if(!avancos.length){
+  if(!pendentes.length){
     emptyAv.style.display='block'; tableAv.style.display='none';
   } else {
     emptyAv.style.display='none'; tableAv.style.display='table';
-    bodyAv.innerHTML = avancos.map(r => {
+    bodyAv.innerHTML = pendentes.map(r => {
       const dias = calcularDiasEspera(r.tsEntrada);
       const diasClass = dias === 0 ? 'dias-ok' : dias <= 2 ? 'dias-warn' : 'dias-crit';
       const diasLabel = dias === 0 ? 'Hoje' : dias + ' dia' + (dias>1?'s':'');
@@ -1570,6 +1606,48 @@ function renderRetiradas(){
       </tr>`;
     }).join('');
   }
+
+  // ── HISTÓRICO DE REGULARIZAÇÕES ──
+  const fonte = todosOsDadosNuvem.length ? todosOsDadosNuvem : registros;
+  let historico = fonte.filter(r => r && r.entradaAvanco === 'SIM' && r.statusAvanco === 'REGULARIZADO');
+  if(busca) historico = historico.filter(r =>
+    (r.nf||'').toLowerCase().includes(busca) ||
+    (r.fornecedor||'').toLowerCase().includes(busca) ||
+    (r.compradorAvanco||'').toLowerCase().includes(busca)
+  );
+  historico.sort((a,b) => (b.tsRegularizacao||0) - (a.tsRegularizacao||0));
+
+  const bodyH = document.getElementById('avancoHistBody');
+  const tableH = document.getElementById('avancoHistTable');
+  const emptyH = document.getElementById('avancoHistEmpty');
+
+  if(!historico.length){
+    emptyH.style.display='block'; tableH.style.display='none';
+  } else {
+    emptyH.style.display='none'; tableH.style.display='table';
+    bodyH.innerHTML = historico.map(r => {
+      let tempoRes = '—';
+      if(r.tsRegularizacao && r.tsEntrada){
+        const diffMin = Math.round((r.tsRegularizacao - r.tsEntrada) / 60000);
+        if(diffMin < 60) tempoRes = diffMin + 'min';
+        else if(diffMin < 1440) tempoRes = Math.floor(diffMin/60) + 'h ' + (diffMin%60) + 'min';
+        else tempoRes = Math.floor(diffMin/1440) + 'd ' + Math.floor((diffMin%1440)/60) + 'h';
+      }
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:12px;">${r.data||''} ${r.hora||''}</td>
+        <td style="font-family:var(--mono);font-weight:600;">${r.nf||'—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.fornecedor||''}">${(r.fornecedor||'—').substring(0,25)}${(r.fornecedor||'').length>25?'…':''}</td>
+        <td style="color:var(--orange);font-weight:500;">${r.compradorAvanco||'—'}</td>
+        <td style="font-family:var(--mono);font-size:12px;">${r.horaRegularizacao||'—'}</td>
+        <td><span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(61,220,151,.3);">${tempoRes}</span></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function renderRetiradas(){
+  atualizarBadgeRetiradas();
+  const busca = (document.getElementById('retBusca')||{value:''}).value.toLowerCase();
 
   // ── PENDENTES RETIRADA ──
   let pendentes = obterPendentes();
