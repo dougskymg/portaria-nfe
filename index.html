@@ -2115,7 +2115,7 @@ function renderDashboard(){
     if(contagemTrend[r.data] !== undefined) contagemTrend[r.data]++;
   });
   const maxTrend = Math.max(...Object.values(contagemTrend), 1);
-  const totalOntem = contagemTrend[listaDias[1]] || 0;
+  const totalOntem = contagemTrend[listaDias[listaDias.length - 2]] || 0;
   document.getElementById('txtTrendComparativo').textContent = `Ontem: ${totalOntem} NF${totalOntem !== 1 ? 's' : ''}`;
 
   document.getElementById('trendChartGrid').innerHTML = listaDias.map((dia, idx) => {
