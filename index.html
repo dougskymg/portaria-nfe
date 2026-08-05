@@ -1168,7 +1168,7 @@ async function salvar(auto=false) {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const resposta = await fetch(GOOGLE_APP_URL, {
+      const resposta = await fetchComRetry(GOOGLE_APP_URL, {
         method: 'POST',
         body: JSON.stringify(registro),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1213,6 +1213,41 @@ async function salvar(auto=false) {
 }
 
 function persistir(){localStorage.setItem('portaria_registros_hoje',JSON.stringify(registros));}
+
+// ══════════════════════════════════════════════
+// RETRY AUTOMÁTICO PARA FALHAS DE REDIRECIONAMENTO DO APPS SCRIPT
+// ══════════════════════════════════════════════
+// O Web App do Apps Script responde via redirecionamento (302) para uma URL
+// temporária em script.googleusercontent.com. Esse redirecionamento pode falhar
+// pontualmente (404 ou erro de rede) mesmo com a implantação e permissões corretas —
+// é uma instabilidade conhecida da infraestrutura do Google, não um bug no código.
+// Essa função tenta de novo automaticamente antes de expor o erro ao usuário.
+async function fetchComRetry(url, options = {}, maxTentativas = 3, delayMs = 1200) {
+  let ultimoErro = null;
+  for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
+    try {
+      const resposta = await fetch(url, options);
+      // 404/502/503 aqui normalmente indicam falha de redirecionamento do Google,
+      // não erro do nosso Code.gs (que teria retornado 200 com status:'erro' no corpo).
+      if (!resposta.ok && [404, 502, 503].includes(resposta.status) && tentativa < maxTentativas) {
+        console.warn(`Tentativa ${tentativa} falhou com status ${resposta.status} — tentando de novo em ${delayMs}ms...`);
+        await sleep(delayMs);
+        continue;
+      }
+      return resposta;
+    } catch (erro) {
+      ultimoErro = erro;
+      // AbortError (timeout intencional) não deve ser retentado automaticamente —
+      // quem chamou já definiu um timeout deliberado.
+      if (erro.name === 'AbortError' || tentativa === maxTentativas) {
+        throw erro;
+      }
+      console.warn(`Tentativa ${tentativa} falhou (${erro.message}) — tentando de novo em ${delayMs}ms...`);
+      await sleep(delayMs);
+    }
+  }
+  throw ultimoErro;
+}
 
 
 // ══════════════════════════════════════════════
@@ -1380,7 +1415,7 @@ async function iniciarProcessamentoLote(){
     try {
       const controller = new AbortController();
       const tid = setTimeout(() => controller.abort(), 15000);
-      const resp = await fetch(GOOGLE_APP_URL, {
+      const resp = await fetchComRetry(GOOGLE_APP_URL, {
         method: 'POST',
         body: JSON.stringify(registro),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1549,7 +1584,7 @@ async function confirmarRetiradasLote(){
     try {
       const ctrl = new AbortController();
       const tid = setTimeout(() => ctrl.abort(), 15000);
-      const resp = await fetch(GOOGLE_APP_URL, {
+      const resp = await fetchComRetry(GOOGLE_APP_URL, {
         method: 'POST',
         body: JSON.stringify({ tipo:'retirada', chave, statusRetirada:'RETIRADO', nomeRetirada:nome.toUpperCase(), matriculaRetirada:matricula.toUpperCase(), horaRetirada, tsRetirada }),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1795,7 +1830,7 @@ async function confirmarRetirada(){
   try {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 15000);
-    const resp = await fetch(GOOGLE_APP_URL, {
+    const resp = await fetchComRetry(GOOGLE_APP_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1905,7 +1940,7 @@ async function confirmarRegularizacao(){
   try {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 15000);
-    const resp = await fetch(GOOGLE_APP_URL, {
+    const resp = await fetchComRetry(GOOGLE_APP_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -2238,7 +2273,7 @@ async function carregarDadosDoGoogle() {
   if (!GOOGLE_APP_URL || GOOGLE_APP_URL.includes('COLE_AQUI')) return;
   
   try {
-    const resposta = await fetch(GOOGLE_APP_URL);
+    const resposta = await fetchComRetry(GOOGLE_APP_URL);
     todosOsDadosNuvem = await resposta.json(); 
     
     if(!Array.isArray(todosOsDadosNuvem)) {
