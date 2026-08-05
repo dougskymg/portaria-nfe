@@ -1180,12 +1180,19 @@ async function salvar(auto=false) {
       if (!resposta.ok) {
         throw new Error(`Erro no Google Sheets: Status ${resposta.status}`);
       }
-      
+
+      const resultado = await resposta.json();
+
       registros.unshift(registro); 
       if (Array.isArray(todosOsDadosNuvem)) todosOsDadosNuvem.unshift(registro);
       persistir(); 
       renderLog();
-      showToast(`NF ${nf} registrada com sucesso${auto?' [AUTO]':''}`, 'success');
+
+      if (resultado && resultado.duplicado) {
+        showToast(`NF ${nf} já estava registrada na planilha — nada duplicado`, 'warn');
+      } else {
+        showToast(`NF ${nf} registrada com sucesso${auto?' [AUTO]':''}`, 'success');
+      }
       limpar();
     } catch (error) {
       clearTimeout(timeoutId);
