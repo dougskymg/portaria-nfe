@@ -2018,7 +2018,7 @@ function clearLog(){
   if(confirm('Limpar todos os registros da sessão?')){registros=[];persistir();renderLog();showToast('Registros limpos','info');}
 }
 
-function popularFiltroMes() {
+async function popularFiltroMes() {
   const select = document.getElementById('selMesDash');
   if(!select) return;
   select.innerHTML = `
@@ -2054,14 +2054,31 @@ function popularFiltroMes() {
     option.textContent = `${nomeMes} / ${ano}`;
     select.appendChild(option);
   });
-  
+
+  // Anos arquivados (Arquivo_AAAA) — só consulta a lista de nomes, não os dados,
+  // então é uma chamada leve e rápida mesmo com anos de histórico acumulado.
+  try {
+    const resp = await fetchComRetry(GOOGLE_APP_URL + '?periodo=anosDisponiveis');
+    const anosArquivados = await resp.json();
+    if (Array.isArray(anosArquivados)) {
+      anosArquivados.forEach(ano => {
+        const option = document.createElement('option');
+        option.value = 'arquivo:' + ano;
+        option.textContent = `Ano ${ano} (arquivo)`;
+        select.appendChild(option);
+      });
+    }
+  } catch (e) {
+    console.warn('Não foi possível listar anos arquivados:', e.message);
+  }
+
   const optTodos = document.createElement('option');
   optTodos.value = 'todos';
   optTodos.textContent = 'Todos os Registros';
   select.appendChild(optTodos);
 }
 
-function renderDashboard(){
+async function renderDashboard(){
   if (!Array.isArray(todosOsDadosNuvem)) return;
   const filtro = document.getElementById('selMesDash').value;
   const agora = new Date();
@@ -2080,24 +2097,36 @@ function renderDashboard(){
     return null;
   }
 
+  // Resolve a base de dados conforme o período escolhido. "atual", "hoje" e
+  // meses dentro da janela operacional usam os dados já carregados em memória
+  // (rápido). "arquivo:ANO" e "todos" buscam sob demanda no servidor, só quando
+  // o usuário pede explicitamente — evita carregar todo o histórico sempre.
+  let baseDados = todosOsDadosNuvem;
+  if (filtro === 'todos') {
+    baseDados = await obterDadosDoPeriodoArquivado('todos', 'periodo=todos');
+  } else if (filtro.startsWith('arquivo:')) {
+    const ano = filtro.split(':')[1];
+    baseDados = await obterDadosDoPeriodoArquivado('arquivo:' + ano, 'periodo=arquivo&ano=' + ano);
+  }
+
   let dadosFiltrados = [];
   if (filtro === 'atual') {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+    dadosFiltrados = baseDados.filter(r => {
       const p = parsearData(r);
       return p && p.mes === mesAtual && p.ano === anoAtual;
     });
   } else if (filtro === 'hoje') {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+    dadosFiltrados = baseDados.filter(r => {
       const p = parsearData(r);
       if(!p) return false;
       return p.dia === agora.getDate() && p.mes === mesAtual && p.ano === anoAtual;
     });
-  } else if (filtro === 'todos') {
-    dadosFiltrados = todosOsDadosNuvem.filter(r => r !== null);
+  } else if (filtro === 'todos' || filtro.startsWith('arquivo:')) {
+    dadosFiltrados = baseDados.filter(r => r !== null);
   } else {
     // filtro específico ex: "05/2026"
     const [mesFiltro, anoFiltro] = filtro.split('/').map(Number);
-    dadosFiltrados = todosOsDadosNuvem.filter(r => {
+    dadosFiltrados = baseDados.filter(r => {
       const p = parsearData(r);
       return p && p.mes === mesFiltro && p.ano === anoFiltro;
     });
@@ -2274,58 +2303,10 @@ async function carregarDadosDoGoogle() {
   
   try {
     const resposta = await fetchComRetry(GOOGLE_APP_URL);
-    todosOsDadosNuvem = await resposta.json(); 
-    
-    if(!Array.isArray(todosOsDadosNuvem)) {
-      todosOsDadosNuvem = [];
-    }
-
-    // Normalizar campo data e hora ANTES de deduplicar
-    todosOsDadosNuvem = todosOsDadosNuvem.map(r => {
-      if(!r) return r;
-      if(!r.data || r.data === '') {
-        if(r.tsEntrada) {
-          const dt = new Date(Number(r.tsEntrada));
-          if(!isNaN(dt)) {
-            r.data = String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear();
-          }
-        }
-      } else if(/^\d{4}-/.test(r.data)) {
-        const partes = r.data.substring(0,10).split('-');
-        r.data = partes[2] + '/' + partes[1] + '/' + partes[0];
-      } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(r.data)) {
-        const p = r.data.split('/');
-        r.data = p[0].padStart(2,'0') + '/' + p[1].padStart(2,'0') + '/' + p[2];
-      }
-      if(r.hora && typeof r.hora === 'string' && r.hora.startsWith('1899-12-30T')) {
-        const dt = new Date(r.hora);
-        if(!isNaN(dt)) r.hora = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
-      }
-      // horaRetirada pode vir como serial 1899-12-30T... do Sheets
-      if(r.horaRetirada && typeof r.horaRetirada === 'string' && r.horaRetirada.startsWith('1899-12-30T')) {
-        const dt = new Date(r.horaRetirada);
-        if(!isNaN(dt)) r.horaRetirada = (r.data||'') + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
-      }
-      // horaAjuste pode vir como serial 1899-12-30T... do Sheets
-      if(r.horaAjuste && typeof r.horaAjuste === 'string' && r.horaAjuste.startsWith('1899-12-30T')) {
-        const dt = new Date(r.horaAjuste);
-        if(!isNaN(dt)) r.horaAjuste = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
-      }
-      return r;
-    });
-
-    // Desduplicar por chave+data — mesma NF pode aparecer em dias diferentes
-    const chavesVistas = new Set();
-    todosOsDadosNuvem = todosOsDadosNuvem.filter(r => {
-      if(!r || !r.chave) return false;
-      const key = r.chave + '|' + (r.data || '');
-      if(chavesVistas.has(key)) return false;
-      chavesVistas.add(key);
-      return true;
-    });
+    let dados = await resposta.json(); 
+    todosOsDadosNuvem = normalizarEDeduplicarRegistros(dados);
 
     // Popular histórico de retiradas com registros já retirados na planilha
-
     const retiiradasNuvem = todosOsDadosNuvem.filter(r => r && r.statusRetirada === 'RETIRADO');
     if(retiiradasNuvem.length) {
       const chavesRetiradas = new Set(retiradas.map(r => r && r.chave));
@@ -2353,6 +2334,79 @@ async function carregarDadosDoGoogle() {
   } catch (error) {
     console.error("Erro no carregamento inicial:", error);
     showToast('Aviso: Operando em modo Offline local.', 'warn');
+  }
+}
+
+// Normalização (data/hora vindas do Sheets) e deduplicação por chave+data.
+// Extraída para função reutilizável porque também é aplicada aos dados
+// carregados sob demanda de abas de arquivo (Arquivo_AAAA).
+function normalizarEDeduplicarRegistros(dados) {
+  if(!Array.isArray(dados)) dados = [];
+
+  dados = dados.map(r => {
+    if(!r) return r;
+    if(!r.data || r.data === '') {
+      if(r.tsEntrada) {
+        const dt = new Date(Number(r.tsEntrada));
+        if(!isNaN(dt)) {
+          r.data = String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear();
+        }
+      }
+    } else if(/^\d{4}-/.test(r.data)) {
+      const partes = r.data.substring(0,10).split('-');
+      r.data = partes[2] + '/' + partes[1] + '/' + partes[0];
+    } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(r.data)) {
+      const p = r.data.split('/');
+      r.data = p[0].padStart(2,'0') + '/' + p[1].padStart(2,'0') + '/' + p[2];
+    }
+    if(r.hora && typeof r.hora === 'string' && r.hora.startsWith('1899-12-30T')) {
+      const dt = new Date(r.hora);
+      if(!isNaN(dt)) r.hora = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
+    }
+    if(r.horaRetirada && typeof r.horaRetirada === 'string' && r.horaRetirada.startsWith('1899-12-30T')) {
+      const dt = new Date(r.horaRetirada);
+      if(!isNaN(dt)) r.horaRetirada = (r.data||'') + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
+    }
+    if(r.horaAjuste && typeof r.horaAjuste === 'string' && r.horaAjuste.startsWith('1899-12-30T')) {
+      const dt = new Date(r.horaAjuste);
+      if(!isNaN(dt)) r.horaAjuste = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
+    }
+    return r;
+  });
+
+  const chavesVistas = new Set();
+  dados = dados.filter(r => {
+    if(!r || !r.chave) return false;
+    const key = r.chave + '|' + (r.data || '');
+    if(chavesVistas.has(key)) return false;
+    chavesVistas.add(key);
+    return true;
+  });
+
+  return dados;
+}
+
+// ══════════════════════════════════════════════
+// CARREGAMENTO SOB DEMANDA DE DADOS ARQUIVADOS
+// ══════════════════════════════════════════════
+// A aba operacional "Registros" só guarda os últimos meses (ver
+// MESES_MANTIDOS_EM_REGISTROS no Code.gs). Dados de meses/anos mais antigos
+// ficam em abas "Arquivo_AAAA" e só são buscados quando o usuário
+// explicitamente seleciona esse período no Dashboard — não em toda carga de página.
+const cacheDadosArquivados = {}; // { 'todos': [...], 'arquivo:2025': [...] }
+
+async function obterDadosDoPeriodoArquivado(chaveCache, queryParams) {
+  if (cacheDadosArquivados[chaveCache]) return cacheDadosArquivados[chaveCache];
+
+  showToast('Carregando dados arquivados, aguarde...', 'info');
+  try {
+    const resp = await fetchComRetry(GOOGLE_APP_URL + '?' + queryParams);
+    const dados = normalizarEDeduplicarRegistros(await resp.json());
+    cacheDadosArquivados[chaveCache] = dados;
+    return dados;
+  } catch (e) {
+    showToast('Falha ao carregar dados arquivados. Exibindo apenas dados recentes.', 'error');
+    return todosOsDadosNuvem;
   }
 }
 
